@@ -1,15 +1,24 @@
 package server;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
-import java.io.IOException;
 
 public class Server {
 
-    private int port;
-    private String host;
+    //private int port;
+    //private String host;
+
+    static final int port = 8000;
 
     private SSLSocket sslSocket;
     private SSLServerSocket sslServerSocket;
@@ -18,39 +27,43 @@ public class Server {
 
     public static void main(String[] args) {
 
-        if (args.length < 2) {
+     /*   if (args.length < 2) {
             System.out.println("Usage: java Server <port> <host>");
             return;
-        }
+        }*/
 
-        Server server = new Server(Integer.parseInt(args[0]), args[1]);
+        Server server = new Server();
     }
 
-    public Server(int port, String host) {
-        this.port = port;
-        this.host = host;
-
+    public Server() {
+       // System.setProperty("https.protocols", "TLSv1.1,TLSv1.2");
+       // System.setProperty("javax.net.ssl.trustStore", "home/ana/Dropbox/faculdade/3ano/2semestre/SDIS/SDIS-FEUP-2/keyStore/store");
+        //System.setProperty("javax.net.ssl.trustStorePassword", "password");
         sslServerSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
 
         try {
-            sslServerSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(port);
-        } catch (IOException e) {
-            System.out.println("Failed to create sslServerSocket");
-            e.printStackTrace();
-        }
+            ServerSocket sslServerSocket = sslServerSocketFactory.createServerSocket(port);
+            System.out.println("SSL ServerSocket started");
+            System.out.println(sslServerSocket.toString());
 
-        listening();
-    }
+            Socket socket = sslServerSocket.accept();
+            System.out.println("ServerSocket accepted");
 
-    private void listening() {
-        while(true){
-            try {
-                System.out.println("Pim!");
-
-                new ConnectionHandle((SSLSocket) sslServerSocket.accept());
-            } catch (IOException e) {
-                e.printStackTrace();
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            try (BufferedReader bufferedReader =
+                         new BufferedReader(
+                                 new InputStreamReader(socket.getInputStream()))) {
+                String line;
+                while((line = bufferedReader.readLine()) != null){
+                    System.out.println(line);
+                    out.println(line);
+                }
             }
+            System.out.println("Closed");
+
+        } catch (IOException ex) {
+            Logger.getLogger(Server.class.getName())
+                    .log(Level.SEVERE, null, ex);
         }
     }
 }
