@@ -1,9 +1,6 @@
 package server;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -36,9 +33,11 @@ public class Server {
     }
 
     public Server() {
-       // System.setProperty("https.protocols", "TLSv1.1,TLSv1.2");
-       // System.setProperty("javax.net.ssl.trustStore", "home/ana/Dropbox/faculdade/3ano/2semestre/SDIS/SDIS-FEUP-2/keyStore/store");
-        //System.setProperty("javax.net.ssl.trustStorePassword", "password");
+
+        System.setProperty("javax.net.ssl.keyStoreType","JKS");
+        System.setProperty("javax.net.ssl.keyStore", System.getProperty("user.dir") + File.separator + "keyStore" + File.separator + "server.keys");
+        System.setProperty("javax.net.ssl.keyStorePassword","123456");
+
         sslServerSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
 
         try {
