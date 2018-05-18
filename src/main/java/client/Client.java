@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -31,7 +32,11 @@ public class Client {
 //            urlParameters.add(new BasicNameValuePair("password", "supersecret"));
 //            urlParameters.add(new BasicNameValuePair("email", "admin@admfactory.com"));
 
-            StringEntity input = new StringEntity("BENFICAAAAAAAAAAAAAAAAA");
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Enter something:");
+                    String inputLine = scanner.nextLine();
+
+            StringEntity input = new StringEntity(inputLine);
             postRequest.setEntity(input);
 
 //            postRequest.setEntity(new UrlEncodedFormEntity(urlParameters));
@@ -63,6 +68,9 @@ public class Client {
             e.printStackTrace();
         }
 
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter something:");
+        String inputLine = scanner.nextLine();
     }
 
 }
