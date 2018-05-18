@@ -1,16 +1,16 @@
 package server;
 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
 
-public class Server {
+public class Server2 {
 
     //private int port;
     //private String host;
@@ -29,10 +29,10 @@ public class Server {
             return;
         }*/
 
-        Server server = new Server();
+        Server2 server = new Server2();
     }
 
-    public Server() {
+    public Server2() {
 
         System.setProperty("javax.net.ssl.keyStoreType","JKS");
         System.setProperty("javax.net.ssl.keyStore", System.getProperty("user.dir") + File.separator + "keyStore" + File.separator + "server.keys");
@@ -61,7 +61,7 @@ public class Server {
             System.out.println("Closed");
 
         } catch (IOException ex) {
-            Logger.getLogger(Server.class.getName())
+            Logger.getLogger(Server2.class.getName())
                     .log(Level.SEVERE, null, ex);
         }
     }
