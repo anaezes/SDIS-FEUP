@@ -1,76 +1,61 @@
 package client;
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
 
 public class Client {
 
+    private static HttpURLConnection con;
+
     public static void main(String[] args) {
+        String url = "http://localhost:8000/test";
+        String urlParameters = "name=Jack&occupation=programmer";
+        byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+
         try {
 
-            HttpClient httpClient = HttpClients.createDefault();
-            HttpPost postRequest = new HttpPost(
-                    "http://localhost:8000/test");
+            URL myurl = new URL(url);
+            con = (HttpURLConnection) myurl.openConnection();
 
-//            List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
-//            urlParameters.add(new BasicNameValuePair("user", "admfactory"));
-//            urlParameters.add(new BasicNameValuePair("password", "supersecret"));
-//            urlParameters.add(new BasicNameValuePair("email", "admin@admfactory.com"));
+            con.setDoOutput(true);
+            con.setRequestMethod("POST");
+            con.setRequestProperty("User-Agent", "Java client");
+            con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
-            Scanner scanner = new Scanner(System.in);
-            System.out.println("Enter something:");
-                    String inputLine = scanner.nextLine();
-
-            StringEntity input = new StringEntity(inputLine);
-            postRequest.setEntity(input);
-
-//            postRequest.setEntity(new UrlEncodedFormEntity(urlParameters));
-
-            HttpResponse response = httpClient.execute(postRequest);
-
-            if (response.getStatusLine().getStatusCode() != 200) {
-                throw new RuntimeException("Failed : HTTP error code : "
-                        + response.getStatusLine().getStatusCode());
+            try (DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
+                wr.write(postData);
             }
 
-            BufferedReader br = new BufferedReader(
-                    new InputStreamReader((response.getEntity().getContent())));
+            StringBuilder content;
 
-            String output;
-            System.out.println("Output from Server .... \n");
-            while ((output = br.readLine()) != null) {
-                System.out.println(output);
+            try (BufferedReader in = new BufferedReader(
+                    new InputStreamReader(con.getInputStream()))) {
+
+                String line;
+                content = new StringBuilder();
+
+                while ((line = in.readLine()) != null) {
+                    content.append(line);
+                    content.append(System.lineSeparator());
+                }
             }
 
-//            httpClient.get.shutdown();
+            System.out.println(content.toString());
 
-        } catch (ClientProtocolException e) {
-
+        } catch (MalformedURLException e) {
             e.printStackTrace();
-
         } catch (IOException e) {
-
             e.printStackTrace();
-        }
+        } finally {
 
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter something:");
-        String inputLine = scanner.nextLine();
+            con.disconnect();
+        }
     }
 
 }
