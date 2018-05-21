@@ -1,4 +1,4 @@
-package server;
+package main.java.server;
 
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
