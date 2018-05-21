@@ -9,6 +9,8 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
+import javax.net.ssl.HttpsURLConnection;
+
 /*
  * a simple static http server
  */
@@ -20,7 +22,6 @@ public class Server {
         server.createContext("/chat", new MessageHandler());
         server.setExecutor(null); // creates a default executor
         server.start();
-        while(true);
     }
 
     static class HelloHandler implements HttpHandler {
@@ -50,7 +51,7 @@ public class Server {
             String query = br.readLine();
             int b;
             StringBuilder buf = new StringBuilder(512);
-            System.out.println("pim");
+            System.out.println("pum");
             while ((b = br.read()) != -1) {
                 buf.append((char) b);
             }
@@ -62,6 +63,4 @@ public class Server {
             os.close();
         }
     }
-
-
 }

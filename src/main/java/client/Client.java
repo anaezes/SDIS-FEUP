@@ -81,6 +81,21 @@ public class Client {
                     wr.write(postData);
                     wr.close();
                 }
+
+                StringBuilder content;
+
+                try (BufferedReader in = new BufferedReader(
+                        new InputStreamReader(con.getInputStream()))) {
+
+                    String line;
+                    content = new StringBuilder();
+
+                    while ((line = in.readLine()) != null) {
+                        content.append(line);
+                        content.append(System.lineSeparator());
+                    }
+                    in.close();
+                }
             }
             scanner.close();
 
