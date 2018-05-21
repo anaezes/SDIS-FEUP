@@ -8,12 +8,19 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Random;
 import java.util.Scanner;
 
 
 public class Client {
 
     private static HttpURLConnection con;
+    private int idClient;
+
+    public Client() {
+        Random ran = new Random();
+        this.idClient = ran.nextInt();
+    }
 
     private static void makeHttpRequest(String url) throws IOException {
         URL myurl = new URL(url);
@@ -55,8 +62,11 @@ public class Client {
     }
 
     public static void main(String[] args) {
+
+        Client client = new Client();
+
         String url = "http://localhost:8000/test";
-        String urlParameters = "name=Jack&occupation=programmer";
+        String urlParameters = "id=" + client.idClient +"&name=Jack&occupation=programmer";
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
         try {
@@ -71,7 +81,7 @@ public class Client {
                     break;
                 }
 
-                urlParameters = "message="+message;
+                urlParameters = "id=" + client.idClient + "&message="+message;
                 postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
                 //necessary - make new http request

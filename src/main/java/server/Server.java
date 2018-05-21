@@ -31,12 +31,11 @@ public class Server {
             String query = br.readLine();
             int b;
             StringBuilder buf = new StringBuilder(512);
-            System.out.println("pim");
             while ((b = br.read()) != -1) {
                 buf.append((char) b);
             }
             System.out.println(query);
-            byte [] response = "Welcome Real's HowTo test page".getBytes();
+            byte [] response = "Welcome to Xet!!!".getBytes();
             t.sendResponseHeaders(200, response.length);
             OutputStream os = t.getResponseBody();
             os.write(response);
@@ -51,7 +50,6 @@ public class Server {
             String query = br.readLine();
             int b;
             StringBuilder buf = new StringBuilder(512);
-            System.out.println("pum");
             while ((b = br.read()) != -1) {
                 buf.append((char) b);
             }
