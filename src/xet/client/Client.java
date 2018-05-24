@@ -21,6 +21,7 @@ public class Client {
     private int idClient;
     private String username;
     private String room;
+    private Thread updateThread;
 
     public Client(String username) {
         Random ran = new Random();
@@ -124,11 +125,13 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        System.exit(0);
     }
 
     private void startUpdateThread() {
 
-        Thread update = new Thread() {
+        this.updateThread = new Thread() {
             public void run() {
                 while(true) {
                     try {
@@ -175,7 +178,7 @@ public class Client {
             }
         };
 
-        update.start();
+        updateThread.start();
     }
 
     private String readServerAnswer() throws IOException {
