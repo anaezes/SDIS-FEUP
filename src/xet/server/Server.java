@@ -1,4 +1,4 @@
-package main.java.server;
+package xet.server;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -10,7 +10,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 
 /*
- * a simple static http server
+ * a simple static http xet.server
  */
 public class Server {
 
@@ -52,7 +52,7 @@ public class Server {
                 buf.append((char) b);
             }
             System.out.println(query);
-            byte [] response = "Got your message".getBytes();
+            byte [] response = "Got your xet.message".getBytes();
             t.sendResponseHeaders(200, response.length);
             OutputStream os = t.getResponseBody();
             os.write(response);

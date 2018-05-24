@@ -1,4 +1,4 @@
-package main.java.server;
+package xet.server;
 
 import javax.net.ssl.SSLSocket;
 

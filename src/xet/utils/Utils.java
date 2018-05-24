@@ -1,4 +1,4 @@
-package main.java.utils;
+package xet.utils;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;

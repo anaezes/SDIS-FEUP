@@ -1,4 +1,4 @@
-package main.java.server;
+package xet.server;
 
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -35,7 +35,7 @@ public class Server2 {
     public Server2() {
 
         System.setProperty("javax.net.ssl.keyStoreType","JKS");
-        System.setProperty("javax.net.ssl.keyStore", System.getProperty("user.dir") + File.separator + "keyStore" + File.separator + "server.keys");
+        System.setProperty("javax.net.ssl.keyStore", System.getProperty("user.dir") + File.separator + "keyStore" + File.separator + "xet.server.keys");
         System.setProperty("javax.net.ssl.keyStorePassword","123456");
 
         sslServerSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();

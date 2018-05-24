@@ -1,9 +1,9 @@
-package main.java.client;
+package xet.client;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import main.java.utils.Utils;
+import xet.utils.Utils;
 
 import java.awt.*;
 import java.io.IOException;

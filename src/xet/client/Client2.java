@@ -1,4 +1,4 @@
-package main.java.client;
+package xet.client;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -92,14 +92,14 @@ public class Client2 {
 
 //        String url = "http://www.google.com/search?q=httpClient";
 //
-//        HttpClient client = HttpClientBuilder.create().build();
+//        HttpClient xet.client = HttpClientBuilder.create().build();
 //        HttpGet request = new HttpGet(url);
 //
 //        // add request header
 //        request.addHeader("User-Agent", "Mozilla/5.0");
 //        HttpResponse response = null;
 //        try {
-//            response = client.execute(request);
+//            response = xet.client.execute(request);
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }

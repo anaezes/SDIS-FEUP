@@ -1,4 +1,4 @@
-package main.java.client;
+package xet.client;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -28,7 +28,7 @@ public class Client {
         con.setDoOutput(true);
         con.setDoInput(true);
         con.setRequestMethod("POST");
-        con.setRequestProperty("User-Agent", "Java client");
+        con.setRequestProperty("User-Agent", "Java xet.client");
         con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
     }
 
@@ -80,7 +80,7 @@ public class Client {
                     break;
                 }
 
-                urlParameters = "id=" + client.idClient + "&message="+message;
+                urlParameters = "id=" + client.idClient + "&xet.message="+message;
                 postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
                 //necessary - make new http request
