@@ -1,14 +1,17 @@
 package xet.server;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
+import xet.room.Room;
+import xet.server.handler.HelloHandler;
+import xet.server.handler.RoomHandler;
+import xet.server.handler.MessageHandler;
+import xet.server.handler.UpdateHandler;
+
 import com.sun.net.httpserver.HttpServer;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import xet.server.handler.HelloHandler;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /*
  * a simple static http xet.server
@@ -19,52 +22,39 @@ public class Server {
     public final static String URL_MESSAGE = "/Message";
     public final static String URL_UPDATE = "/Update";
 
-    public static void main(String[] args) throws Exception {
-        HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
-        server.createContext(URL_HELLO, new HelloHandler());
-        server.createContext(URL_ROOM, new RoomHandler());
-        server.createContext(URL_MESSAGE, new MessageHandler());
-        //server.createContext(URL_UPDATE, new UpdateHandler());
+    private HttpServer server;
+
+    private final HashMap<String, Room> rooms = new HashMap<>();
+
+    public Server() throws IOException {
+
+        rooms.put("general", new Room("general"));
+        rooms.put("games", new Room("games"));
+
+        server = HttpServer.create(new InetSocketAddress(8000), 0);
+    }
+
+    public void start() {
+        server.createContext(URL_HELLO, new HelloHandler(this));
+        server.createContext(URL_ROOM, new RoomHandler(this));
+        server.createContext(URL_MESSAGE, new MessageHandler(this));
+        server.createContext(URL_UPDATE, new UpdateHandler(this));
         server.setExecutor(null); // creates a default executor
         server.start();
     }
 
+    public ArrayList<String> getAvailableRooms() {
+        ArrayList<String> availableRooms = new ArrayList<>();
 
-    static class MessageHandler implements HttpHandler {
-        public void handle(HttpExchange t) throws IOException {
-            InputStreamReader isr =  new InputStreamReader(t.getRequestBody(),"utf-8");
-            BufferedReader br = new BufferedReader(isr);
-            String query = br.readLine();
-            int b;
-            StringBuilder buf = new StringBuilder(512);
-            while ((b = br.read()) != -1) {
-                buf.append((char) b);
-            }
-            System.out.println(query);
-            byte [] response = "Got your xet.message".getBytes();
-            t.sendResponseHeaders(200, response.length);
-            OutputStream os = t.getResponseBody();
-            os.write(response);
-            os.close();
+        for(Map.Entry<String, Room> room : rooms.entrySet()) {
+            availableRooms.add(room.getKey());
         }
+
+        return availableRooms;
     }
 
-    static class RoomHandler implements HttpHandler {
-        public void handle(HttpExchange t) throws IOException {
-            InputStreamReader isr =  new InputStreamReader(t.getRequestBody(),"utf-8");
-            BufferedReader br = new BufferedReader(isr);
-            String query = br.readLine();
-            int b;
-            StringBuilder buf = new StringBuilder(512);
-            while ((b = br.read()) != -1) {
-                buf.append((char) b);
-            }
-            System.out.println(query);
-            byte [] response = "Room choosen!!!! ".getBytes();
-            t.sendResponseHeaders(200, response.length);
-            OutputStream os = t.getResponseBody();
-            os.write(response);
-            os.close();
-        }
+    public static void main(String[] args) throws Exception {
+         new Server().start();
+
     }
 }

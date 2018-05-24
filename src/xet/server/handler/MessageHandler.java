@@ -13,10 +13,11 @@ import java.io.OutputStream;
 /**
  * Created by ana on 5/24/18.
  */
-public class HelloHandler implements HttpHandler {
+
+public class MessageHandler implements HttpHandler {
     private Server server;
 
-    public HelloHandler(Server server) {
+    public MessageHandler(Server server) {
         this.server = server;
     }
 
@@ -30,13 +31,11 @@ public class HelloHandler implements HttpHandler {
             buf.append((char) b);
         }
         System.out.println(query);
-
-        //Room generalRoom = new Room("general");
-        byte [] response = ("Available rooms > " + server.getAvailableRooms().toString()).getBytes();
-
+        byte [] response = "Got your xet.message".getBytes();
         t.sendResponseHeaders(200, response.length);
         OutputStream os = t.getResponseBody();
         os.write(response);
         os.close();
     }
 }
+
