@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
@@ -19,6 +20,7 @@ public class Client {
     private HttpURLConnection con;
     private int idClient;
     private String username;
+    private String room;
 
     public Client(String username) {
         Random ran = new Random();
@@ -78,13 +80,7 @@ public class Client {
         return true;
     }
 
-    public void writeData(String data) {
-
-    }
-
     public static void main(String[] args) {
-
-
 
         //todo login here
         Scanner scanner = new Scanner(System.in);
@@ -102,6 +98,8 @@ public class Client {
 
             //todo choose room
             client.chooseRoom(scanner);
+
+            client.startUpdateThread();
 
             while(true) {
                 System.out.print("xet> ");
@@ -128,6 +126,58 @@ public class Client {
         }
     }
 
+    private void startUpdateThread() {
+
+        Thread update = new Thread() {
+            public void run() {
+                while(true) {
+                    try {
+
+                        URL myurl = new URL(getUrl(Server.URL_UPDATE));
+                        con = (HttpURLConnection) myurl.openConnection();
+
+                        con.setRequestMethod("GET");
+                        con.setRequestProperty("User-Agent", "Java xet.client");
+                        con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+                        int responseCode = con.getResponseCode();
+
+                        if (responseCode != 200) {
+                            System.out.println("Error to update messages!!!");
+                            Thread.sleep(2000);
+                            continue;
+                        }
+
+                        BufferedReader in = new BufferedReader(
+                                new InputStreamReader(con.getInputStream()));
+                        String inputLine;
+                        StringBuffer response = new StringBuffer();
+
+                        while ((inputLine = in.readLine()) != null) {
+                            response.append(inputLine);
+                        }
+                        in.close();
+
+                        //print result
+                        System.out.println(response.toString());
+
+                        Thread.sleep(1000);
+                    } catch (InterruptedException v) {
+                        System.out.println(v);
+                    } catch (ProtocolException e) {
+                        e.printStackTrace();
+                    } catch (MalformedURLException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+
+        update.start();
+    }
+
     private String readServerAnswer() throws IOException {
 
         StringBuilder content;
@@ -152,7 +202,7 @@ public class Client {
     private boolean chooseRoom(Scanner scanner) throws IOException {
 
         System.out.print("Choose room: ");
-        String  room = scanner.nextLine();
+        this.room = scanner.nextLine();
 
         String urlParameters = "id=" + idClient + "&xet.room="+room;
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);

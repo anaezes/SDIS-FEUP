@@ -19,8 +19,8 @@ import java.util.Map;
 public class Server {
     public final static String URL_HELLO = "/hello";
     public final static String URL_ROOM = "/room";
-    public final static String URL_MESSAGE = "/Message";
-    public final static String URL_UPDATE = "/Update";
+    public final static String URL_MESSAGE = "/message";
+    public final static String URL_UPDATE = "/update";
 
     private HttpServer server;
 
