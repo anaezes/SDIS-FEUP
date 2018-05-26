@@ -11,6 +11,7 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,6 +36,8 @@ public class Client extends JFrame {
     private final JPanel userPanel = new JPanel();
     private final JPanel readPanel = new JPanel();
 
+    private JComboBox<String> roomsList;
+
     private SSLSocketFactory sslSocketFactory;
     private Socket socket;
 
@@ -44,13 +47,12 @@ public class Client extends JFrame {
         System.setProperty("javax.net.ssl.trustStoreType", "JKS");
         System.setProperty("javax.net.ssl.trustStore", System.getProperty("user.dir") + File.separator + "keyStore" + File.separator + "truststore");
         System.setProperty("javax.net.ssl.trustStorePassword","123456");
-
-        initGUI();
     }
 
     private void initGUI() {
         this.setVisible(true);
         this.setSize(new Dimension(600,600));
+        this.setTitle("XET - Best chat in the World");
         contentPanel.setSize(new Dimension(600,600));
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
         contentPanel.setBackground(Color.darkGray);
@@ -152,9 +154,6 @@ public class Client extends JFrame {
                     content.append(System.lineSeparator());
                 }
                 in.close();
-
-
-
             return parseConnectionMessage(content.toString());
 
         } catch (IOException e) {
@@ -173,8 +172,8 @@ public class Client extends JFrame {
         String rooms = parts[1];
         System.out.println("ROOMS: " + rooms);
 
-        rooms.toString().replace("[", "");
-        rooms.toString().replace("]", "");
+        rooms = rooms.toString().replace("[", "");
+        rooms = rooms.toString().replace("]", "");
 
         return new ArrayList<String>(Arrays.asList(rooms.split(",")));
     }
@@ -200,6 +199,9 @@ public class Client extends JFrame {
             //todo choose room - verify if choosen room is available
             client.chooseRoom(scanner, response);
 
+            client.initGUI();
+
+
             //make ssl connection
             client.makeSSLconection();
 
@@ -216,6 +218,8 @@ public class Client extends JFrame {
 
         System.exit(0);
     }
+
+
 
     private void makeSSLconection() {
 
@@ -278,8 +282,26 @@ public class Client extends JFrame {
     //todo verify if input is valid!!!!
     private boolean chooseRoom(Scanner scanner, ArrayList<String> rooms) throws IOException {
 
-        System.out.print("Choose room: ");
-        this.room = scanner.nextLine();
+        roomsList = new JComboBox(rooms.toArray());
+
+        String[] options = { "OK", "Cancel"};
+
+        String title = "Choose a room";
+        int selection = JOptionPane.showOptionDialog(null, roomsList, title,
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
+                options[0]);
+
+        if (selection == 1) {
+            System.out.println("selection is: " + options[selection]);
+            System.exit(0);
+        }
+
+        String room = (String)roomsList.getSelectedItem();
+        if (room != null) {
+            System.out.println("room: " + room);
+        }
+
+        this.room = room;
 
         String urlParameters = "username=" + username + "&room="+room;
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
