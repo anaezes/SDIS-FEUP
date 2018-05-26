@@ -1,6 +1,8 @@
 package xet.client;
 import xet.server.Server;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -14,7 +16,7 @@ import java.util.Random;
 import java.util.Scanner;
 
 
-public class Client {
+public class Client extends JFrame {
     private static final String serverAddress = "http://localhost:8000";
 
     private HttpURLConnection con;
@@ -23,10 +25,55 @@ public class Client {
     private String room;
     private Thread updateThread;
 
+    private final JPanel contentPanel = new JPanel();
+    private final JTextPane writeArea = new JTextPane();
+    private final JScrollPane jScrollPane1 = new JScrollPane(writeArea);
+    private final JTextArea messageArea = new JTextArea();
+    private final JScrollPane jScrollPane2 = new JScrollPane(messageArea);
+    private final JButton send = new JButton("SEND");
+    private final JPanel userPanel = new JPanel();
+    private final JPanel readPanel = new JPanel();
+
     public Client(String username) {
         Random ran = new Random();
         this.idClient = ran.nextInt();
         this.username = username;
+
+        initGUI();
+    }
+
+    private void initGUI() {
+        this.setVisible(true);
+        this.setSize(new Dimension(600,600));
+        contentPanel.setSize(new Dimension(600,600));
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
+        contentPanel.setBackground(Color.darkGray);
+
+        userPanel.setPreferredSize(new Dimension(550, 200));
+        userPanel.setBackground(Color.darkGray);
+
+        readPanel.setPreferredSize(new Dimension(550,400));
+
+        writeArea.setPreferredSize(new Dimension(400, 200));
+        writeArea.setEditable(true);
+        jScrollPane1.setPreferredSize(new Dimension(400, 200));
+
+        messageArea.setSize(new Dimension(550, 400));
+        messageArea.setEditable(false);
+        jScrollPane2.setSize(new Dimension(550, 400));
+
+        send.setPreferredSize(new Dimension(100,50));
+
+        userPanel.add(jScrollPane1);
+        userPanel.add(send);
+        readPanel.add(jScrollPane2);
+
+        contentPanel.add(readPanel);
+        contentPanel.add(userPanel);
+
+        messageArea.setBackground(Color.white);
+        messageArea.setLineWrap(true);
+        this.add(contentPanel);
     }
 
     public static String getUrl( String url) {
