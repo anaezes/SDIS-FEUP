@@ -26,7 +26,7 @@ public class Client extends JFrame {
 
     private HttpURLConnection con;
     private String username;
-    private int port;
+    private int socketPort;
     private String room;
     private Thread updateThread;
 
@@ -170,7 +170,7 @@ public class Client extends JFrame {
 
         String port = parts[0];
         System.out.println("PORT: "  + port);
-        this.port = Integer.parseInt(port);
+        this.socketPort = Integer.parseInt(port);
 
         String rooms = parts[1];
         System.out.println("ROOMS: " + rooms);
@@ -225,7 +225,7 @@ public class Client extends JFrame {
 
         try {
             sslSocketFactory = (SSLSocketFactory)SSLSocketFactory.getDefault();
-            socket = sslSocketFactory.createSocket("localhost", port);
+            socket = sslSocketFactory.createSocket("localhost", socketPort);
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName())
                     .log(Level.SEVERE, null, ex);
