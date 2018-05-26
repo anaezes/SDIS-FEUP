@@ -1,17 +1,11 @@
 package xet.server;
-import xet.room.Room;
-import xet.server.handler.HelloHandler;
-import xet.server.handler.RoomHandler;
-import xet.server.handler.MessageHandler;
-import xet.server.handler.UpdateHandler;
-
 import com.sun.net.httpserver.HttpServer;
+import xet.room.Room;
+import xet.server.handler.*;
 
-import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -25,11 +19,17 @@ import java.util.logging.Logger;
  * a simple static http xet.server
  */
 public class Server {
+    public final static String SERVER_BASE_URL = "http://localhost";
+    public final static int SERVER_PORT = 8000;
+    public final static String SERVER_URL = SERVER_BASE_URL + ":" + SERVER_PORT;
+
     public final static String URL_HELLO = "/hello";
     public final static String URL_ROOM = "/room";
     public final static String URL_MESSAGE = "/message";
     public final static String URL_UPDATE = "/update";
-    private int port = 6000;
+    public final static String URL_AUTH_FACEBOOK = "/auth/fb";
+
+    private int socketPort = 6000;
 
     private HttpServer server;
 
@@ -44,7 +44,7 @@ public class Server {
         rooms.put("general", new Room("general"));
         rooms.put("games", new Room("games"));
 
-        server = HttpServer.create(new InetSocketAddress(8000), 0);
+        server = HttpServer.create(new InetSocketAddress(SERVER_PORT), 0);
 
         System.setProperty("javax.net.ssl.keyStoreType","JKS");
         System.setProperty("javax.net.ssl.keyStore", System.getProperty("user.dir") + File.separator + "keyStore" + File.separator + "server.keys");
@@ -58,6 +58,7 @@ public class Server {
         server.createContext(URL_ROOM, new RoomHandler(this));
         server.createContext(URL_MESSAGE, new MessageHandler(this));
         //server.createContext(URL_UPDATE, new UpdateHandler(this));
+        server.createContext(URL_AUTH_FACEBOOK, new AuthFacebookHandler(this));
         server.setExecutor(null); // creates a default executor
         server.start();
     }
@@ -72,18 +73,18 @@ public class Server {
         return availableRooms;
     }
 
-    public int getPort() {
-        return port;
+    public int getSocketPort() {
+        return socketPort;
     }
 
     public void incrementPort() {
-        this.port += 1;
+        this.socketPort += 1;
     }
 
     public void makeSSLConnection(String username, String room) {
 
         try {
-            ServerSocket sslServerSocket = sslServerSocketFactory.createServerSocket(port);
+            ServerSocket sslServerSocket = sslServerSocketFactory.createServerSocket(socketPort);
             System.out.println("SSL ServerSocket started");
             System.out.println(sslServerSocket.toString());
 
@@ -94,7 +95,7 @@ public class Server {
             r.addClientToRoom(username, socket);
 
         } catch (IOException ex) {
-            Logger.getLogger(Server2.class.getName())
+            Logger.getLogger(Server.class.getName())
                     .log(Level.SEVERE, null, ex);
         }
 

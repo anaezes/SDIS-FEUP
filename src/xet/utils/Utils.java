@@ -106,9 +106,47 @@ public class Utils {
             in.close();
             return response.toString();
         } catch (Exception e) {
-            //e.printStackTrace();
             System.err.println(e);
         }
         return "";
+    }
+
+    public static String SendGet(String url) {
+        try {
+            StringBuilder result = new StringBuilder();
+            URL url_ = new URL(url);
+            HttpURLConnection conn = (HttpURLConnection) url_.openConnection();
+            conn.setRequestMethod("GET");
+            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String line;
+            while ((line = rd.readLine()) != null) {
+                result.append(line);
+            }
+            rd.close();
+            return result.toString();
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+        return "";
+    }
+
+    public static String SimpleJsonParser(String JSON, String key, boolean withQuotes) {
+        key = "\"" + key + "\":";
+        if (JSON.contains(key)) {
+            if (withQuotes) {
+                String value = JSON.substring(JSON.indexOf(key) + key.length() + 1,
+                        JSON.indexOf("\"", JSON.indexOf(key) + key.length() + 1));
+                return value;
+            } else {
+                String value = JSON.substring(JSON.indexOf(key) + key.length() + 1,
+                        JSON.indexOf(",", JSON.indexOf(key) + key.length() + 1));
+                return value;
+            }
+        }
+        return "";
+    }
+
+    public static String SimpleJsonParser(String JSON, String key) {
+        return SimpleJsonParser(JSON, key, true);
     }
 }

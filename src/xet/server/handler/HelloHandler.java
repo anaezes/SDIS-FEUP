@@ -30,7 +30,7 @@ public class HelloHandler implements HttpHandler {
             buf.append((char) b);
         }
 
-        byte [] response = (server.getPort()+";" + server.getAvailableRooms().toString()).getBytes();
+        byte [] response = (server.getSocketPort()+";" + server.getAvailableRooms().toString()).getBytes();
 
         t.sendResponseHeaders(200, response.length);
         OutputStream os = t.getResponseBody();

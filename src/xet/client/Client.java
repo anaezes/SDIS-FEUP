@@ -1,4 +1,5 @@
 package xet.client;
+import xet.providers.Facebook;
 import xet.server.Server;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -7,11 +8,13 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
-import java.net.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -179,13 +182,10 @@ public class Client extends JFrame {
     }
 
     public static void main(String[] args) {
-
-        //todo login here
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Username:");
-        String name = scanner.nextLine();
 
-        Client client = new Client(name);
+        String id = Facebook.doLogin(serverAddress);
+        Client client = new Client(id);
 
         try {
             //make request and read response

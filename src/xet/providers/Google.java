@@ -1,4 +1,4 @@
-package xet.client;
+package xet.providers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -13,7 +13,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-public class GoogleLogin {
+public class Google {
     private final String clientID = "249929325899-kdf2nn2ndaemri7nk13r0d6ct8n9jtej.apps.googleusercontent.com";
     private final String clientSecret = "N-Rx2Dt9aP3kGsfc0YXu0nkU";
     private final String authorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -29,7 +29,7 @@ public class GoogleLogin {
 
     private HttpServer server;
 
-    public GoogleLogin() {
+    public Google() {
         // Creates HTTP Server
         try {
             server = HttpServer.create(new InetSocketAddress(port), 0);
