@@ -41,6 +41,11 @@ public class RoomHandler implements HttpHandler {
         System.out.println("username: " + UsersManager.Get().getUserName(user[1]));
         System.out.println("room: " + r[1]);
 
+        //create new room if don't exist
+        if(!server.getAvailableRooms().contains(r[1])) {
+            server.addRoom(r[1]);
+        }
+
         new Thread(() -> {
             server.makeSSLConnection(user[1], r[1]);
         }).start();

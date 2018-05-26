@@ -37,6 +37,7 @@ public class Client extends JFrame {
     private final JTextArea messageArea = new JTextArea();
     private final JScrollPane jScrollPane2 = new JScrollPane(messageArea);
     private final JButton send = new JButton("SEND");
+    private final JButton inviteFriends = new JButton("Invite Friends");
     private final JPanel userPanel = new JPanel();
     private final JPanel readPanel = new JPanel();
 
@@ -55,9 +56,9 @@ public class Client extends JFrame {
 
     private void initGUI() {
         this.setVisible(true);
-        this.setSize(new Dimension(600,600));
+        this.setSize(new Dimension(750,700));
         this.setTitle("XET - Best chat in the World");
-        contentPanel.setSize(new Dimension(600,600));
+        contentPanel.setSize(new Dimension(800,600));
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
         contentPanel.setBackground(Color.darkGray);
 
@@ -76,9 +77,11 @@ public class Client extends JFrame {
         jScrollPane2.setSize(new Dimension(550, 400));
 
         send.setPreferredSize(new Dimension(100,50));
+        inviteFriends.setPreferredSize(new Dimension(150,50));
 
         userPanel.add(jScrollPane1);
         userPanel.add(send);
+        userPanel.add(inviteFriends);
         readPanel.add(jScrollPane2);
 
         contentPanel.add(readPanel);
@@ -90,13 +93,17 @@ public class Client extends JFrame {
 
         send.addActionListener(actionEvent -> {
             String message = writeArea.getText();
-            if(message == null || message.isEmpty())
+            if(message == null || message.isEmpty()) {
+                System.out.println("PUMMM");
                 return;
+            }
 
             writeArea.selectAll();
             writeArea.replaceSelection("");
 
+            message = message.replace("\n", " ");
             String urlParameters = "username=" + username + "&room=" + room + "&message="+message;
+
             byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
             try {
@@ -112,8 +119,11 @@ public class Client extends JFrame {
         this.addWindowListener(new WindowAdapter(){
             public void windowClosing(WindowEvent e){
                 running = false;
-        }});
+            }});
 
+        inviteFriends.addActionListener(actionEvent -> {
+            //todo invite friends
+        });
     }
 
     public static String getUrl( String url) {
@@ -142,7 +152,6 @@ public class Client extends JFrame {
         String urlParameters = "username="+username;
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
-
         try {
             makeHttpRequest(getUrl(Server.URL_HANDSHAKE), postData);
 
@@ -150,14 +159,14 @@ public class Client extends JFrame {
 
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 
-                String line;
-                content = new StringBuilder();
+            String line;
+            content = new StringBuilder();
 
-                while ((line = in.readLine()) != null) {
-                    content.append(line);
-                    content.append(System.lineSeparator());
-                }
-                in.close();
+            while ((line = in.readLine()) != null) {
+                content.append(line);
+                content.append(System.lineSeparator());
+            }
+            in.close();
             return parseConnectionMessage(content.toString());
 
         } catch (IOException e) {
@@ -215,12 +224,9 @@ public class Client extends JFrame {
                 return;
             }
 
-
-            //todo choose room - verify if choosen room is available
             client.chooseRoom(scanner, response);
 
             client.initGUI();
-
 
             //make ssl connection
             client.makeSSLconection();
@@ -254,26 +260,24 @@ public class Client extends JFrame {
 
     private void startUpdateThread() {
 
-        this.updateThread = new Thread() {
-            public void run() {
-                while(true) {
+        this.updateThread = new Thread(() -> {
+            while(true) {
 
-                    try {
-                        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                try {
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
-                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                        String line;
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    String line;
 
-                        while((line = bufferedReader.readLine()) != null){
-                            messageArea.append(line + "\n");
-                        }
+                    while((line = bufferedReader.readLine()) != null){
+                        messageArea.append(line + "\n");
+                    }
 
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-            }
-        };
+        });
 
         updateThread.start();
     }
@@ -298,32 +302,29 @@ public class Client extends JFrame {
         return content.toString();
     }
 
-
-    //todo verify if input is valid!!!!
     private boolean chooseRoom(Scanner scanner, ArrayList<String> rooms) throws IOException {
 
         roomsList = new JComboBox(rooms.toArray());
 
-        String[] options = { "OK", "Cancel"};
+        String[] options = { "OK", "Cancel", "Create Room"};
 
         String title = "Choose a room";
         int selection = JOptionPane.showOptionDialog(null, roomsList, title,
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
                 options[0]);
 
-        if (selection == 1) {
-            System.out.println("selection is: " + options[selection]);
+        if (selection == 1)
             System.exit(0);
-        }
 
-        String room = (String)roomsList.getSelectedItem();
-        if (room != null) {
-            System.out.println("room: " + room);
-        }
+        String room = "";
+        if (selection == 2)
+            room = JOptionPane.showInputDialog("Name of room:");
+        else if(selection == 0)
+            room = (String) roomsList.getSelectedItem();
 
-        this.room = room;
+        this.room = room.replace(" ", "");;
 
-        String urlParameters = "username=" + username + "&room="+room;
+        String urlParameters = "username=" + username + "&room="+this.room;
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
         try {

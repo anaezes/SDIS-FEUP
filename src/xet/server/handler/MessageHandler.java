@@ -31,13 +31,11 @@ public class MessageHandler implements HttpHandler {
         while ((b = br.read()) != -1) {
             buf.append((char) b);
         }
-        System.out.println(query);
-        byte [] response = "Got your xet.message".getBytes();
+        byte [] response = "Got your message".getBytes();
         t.sendResponseHeaders(200, response.length);
         OutputStream os = t.getResponseBody();
         os.write(response);
         os.close();
-
 
         String[] parts = query.split("&");
 

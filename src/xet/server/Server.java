@@ -115,4 +115,8 @@ public class Server {
         System.out.println("pum");
         r.update(user, message);
     }
+
+    public void addRoom(String s) {
+        rooms.put(s, new Room(s));
+    }
 }
