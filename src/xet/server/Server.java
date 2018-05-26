@@ -23,7 +23,7 @@ public class Server {
     public final static int SERVER_PORT = 8000;
     public final static String SERVER_URL = SERVER_BASE_URL + ":" + SERVER_PORT;
 
-    public final static String URL_HELLO = "/hello";
+    public final static String URL_HANDSHAKE = "/handshake";
     public final static String URL_ROOM = "/room";
     public final static String URL_MESSAGE = "/message";
     public final static String URL_UPDATE = "/update";
@@ -54,7 +54,7 @@ public class Server {
     }
 
     public void start() {
-        server.createContext(URL_HELLO, new HelloHandler(this));
+        server.createContext(URL_HANDSHAKE, new HandshakeHandler(this));
         server.createContext(URL_ROOM, new RoomHandler(this));
         server.createContext(URL_MESSAGE, new MessageHandler(this));
         //server.createContext(URL_UPDATE, new UpdateHandler(this));

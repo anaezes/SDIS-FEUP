@@ -143,7 +143,7 @@ public class Client extends JFrame {
 
 
         try {
-            makeHttpRequest(getUrl(Server.URL_HELLO), postData);
+            makeHttpRequest(getUrl(Server.URL_HANDSHAKE), postData);
 
             StringBuilder content;
 

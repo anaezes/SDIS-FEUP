@@ -13,10 +13,10 @@ import java.io.OutputStream;
 /**
  * Created by ana on 5/24/18.
  */
-public class HelloHandler implements HttpHandler {
+public class HandshakeHandler implements HttpHandler {
     private Server server;
 
-    public HelloHandler(Server server) {
+    public HandshakeHandler(Server server) {
         this.server = server;
     }
 
