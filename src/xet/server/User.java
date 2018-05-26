@@ -8,9 +8,13 @@ public class User {
 
     public User(String id, String providerId, String name) {
         this.id = id;
-        this.name = name;
         this.providerId = providerId;
+        this.name = name;
         this.pictureUrl = "";
+
+        if (getProviderId().equals("guest")) {
+            this.name += "[guest" + (UsersManager.Get().getGuests() + 1) + "]";
+        }
     }
 
     public User(String id, String providerId, String name, String pictureUrl) {

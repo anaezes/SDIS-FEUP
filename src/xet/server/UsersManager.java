@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 public class UsersManager {
     private static UsersManager instance;
+    private static int guests = 0;
+
     public static UsersManager Get() {
         if (instance == null) instance = new UsersManager();
         return instance;
@@ -17,6 +19,7 @@ public class UsersManager {
 
     public boolean addUser(User user) {
         if (getUser(user.getId()) == null) {
+            if (user.getProviderId().equals("guest")) guests++;
             return users.add(user);
         }
         return false;
@@ -35,10 +38,7 @@ public class UsersManager {
         return "anonymous";
     }
 
-    public void print() {
-        System.out.println("Users: " + users.size());
-        for (int i = 0; i < users.size(); i++) {
-            System.out.println(users.get(i).getId() + ": " + users.get(i).getName());
-        }
+    public int getGuests() {
+        return guests;
     }
 }

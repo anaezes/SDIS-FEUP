@@ -1,4 +1,4 @@
-package xet.server.handler;
+package xet.server.handler.auth;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;

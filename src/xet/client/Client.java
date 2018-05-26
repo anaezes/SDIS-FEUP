@@ -1,5 +1,6 @@
 package xet.client;
 import xet.providers.Facebook;
+import xet.providers.Guest;
 import xet.server.Server;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -183,8 +184,27 @@ public class Client extends JFrame {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        String id = "";
 
-        String id = Facebook.doLogin(serverAddress);
+        System.out.println("Select login method: ");
+        System.out.println("1 - Guest Login");
+        System.out.println("2 - Facebook Login");
+        String option = scanner.nextLine();
+        System.out.println(option);
+
+        if (option.contains("1")) {
+            System.out.println("Guest Login");
+            System.out.println("Enter desired username:");
+            String username = scanner.nextLine();
+            id = Guest.doLogin(username);
+        } else if (option.contains("2")) {
+            System.out.println("Facebook Login");
+            id = Facebook.doLogin(Server.SERVER_URL);
+        } else {
+            System.err.println("Option not recognized");
+            System.exit(1);
+        }
+
         Client client = new Client(id);
 
         try {

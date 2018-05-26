@@ -2,6 +2,8 @@ package xet.server;
 import com.sun.net.httpserver.HttpServer;
 import xet.room.Room;
 import xet.server.handler.*;
+import xet.server.handler.auth.AuthFacebookHandler;
+import xet.server.handler.auth.AuthGuestHandler;
 
 import javax.net.ssl.SSLServerSocketFactory;
 import java.io.File;
@@ -28,9 +30,9 @@ public class Server {
     public final static String URL_MESSAGE = "/message";
     public final static String URL_UPDATE = "/update";
     public final static String URL_AUTH_FACEBOOK = "/auth/fb";
+    public final static String URL_AUTH_GUEST = "/auth/guest";
 
     private int socketPort = 6000;
-
     private HttpServer server;
 
     private final HashMap<String, Room> rooms = new HashMap<>();
@@ -59,6 +61,7 @@ public class Server {
         server.createContext(URL_MESSAGE, new MessageHandler(this));
         //server.createContext(URL_UPDATE, new UpdateHandler(this));
         server.createContext(URL_AUTH_FACEBOOK, new AuthFacebookHandler(this));
+        server.createContext(URL_AUTH_GUEST, new AuthGuestHandler(this));
         server.setExecutor(null); // creates a default executor
         server.start();
     }
