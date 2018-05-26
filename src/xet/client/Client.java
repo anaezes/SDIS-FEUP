@@ -167,17 +167,14 @@ public class Client extends JFrame {
 
             client.startUpdateThread();
 
-            System.out.println("pam!!!");
-
             while(true) {
                 System.out.print("xet> ");
                 String message = scanner.nextLine();
                 if(message.equals("exit")){
                     break;
                 }
-                System.out.println("pum!!!");
 
-                String urlParameters = "username=" + client.username + "&xet.message="+message;
+                String urlParameters = "username=" + client.username + "&room=" + client.room + "&message="+message;
                 byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
                 //necessary - make new http request
@@ -185,8 +182,6 @@ public class Client extends JFrame {
 
                 String content = client.readServerAnswer();
                 System.out.println(content);
-                System.out.println("pam!!!");
-
             }
             scanner.close();
 
@@ -215,47 +210,22 @@ public class Client extends JFrame {
         this.updateThread = new Thread() {
             public void run() {
                 while(true) {
+                    PrintWriter out = null;
                     try {
+                        out = new PrintWriter(socket.getOutputStream(), true);
 
-                        URL myurl = new URL(getUrl(Server.URL_UPDATE));
-                        con = (HttpURLConnection) myurl.openConnection();
-
-                        con.setRequestMethod("GET");
-                        con.setRequestProperty("User-Agent", "Java xet.client");
-                        con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-
-                        int responseCode = con.getResponseCode();
-
-                        if (responseCode != 200) {
-                            System.out.println("Error to update messages!!!");
-                            Thread.sleep(2000);
-                            continue;
+                   BufferedReader bufferedReader = new BufferedReader(
+                                         new InputStreamReader(socket.getInputStream()));
+                        String line;
+                        while((line = bufferedReader.readLine()) != null){
+                            System.out.println(line);
+                            out.println("RECEBEU!!!" + line);
                         }
 
-                        BufferedReader in = new BufferedReader(
-                                new InputStreamReader(con.getInputStream()));
-                        String inputLine;
-                        StringBuffer response = new StringBuffer();
-
-                        while ((inputLine = in.readLine()) != null) {
-                            response.append(inputLine);
-                        }
-                        in.close();
-
-                        //print result
-                        System.out.println(response.toString());
-
-                        Thread.sleep(1000);
-                    } catch (InterruptedException v) {
-                        System.out.println(v);
-                    } catch (ProtocolException e) {
-                        e.printStackTrace();
-                    } catch (MalformedURLException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
+            }
             }
         };
 

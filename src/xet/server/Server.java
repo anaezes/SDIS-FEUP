@@ -57,7 +57,7 @@ public class Server {
         server.createContext(URL_HELLO, new HelloHandler(this));
         server.createContext(URL_ROOM, new RoomHandler(this));
         server.createContext(URL_MESSAGE, new MessageHandler(this));
-        server.createContext(URL_UPDATE, new UpdateHandler(this));
+        //server.createContext(URL_UPDATE, new UpdateHandler(this));
         server.setExecutor(null); // creates a default executor
         server.start();
     }
@@ -91,7 +91,7 @@ public class Server {
             System.out.println("ServerSocket accepted");
 
             Room r = rooms.get(room);
-            r.addClientToRoom(username, sslServerSocket);
+            r.addClientToRoom(username, socket);
 
         } catch (IOException ex) {
             Logger.getLogger(Server2.class.getName())
@@ -103,5 +103,12 @@ public class Server {
 
     public static void main(String[] args) throws Exception {
         new Server().start();
+    }
+
+    public void updateRooms(String user, String room, String message) {
+        System.out.println("Update Rooms");
+        Room r = rooms.get(room);
+        System.out.println("pum");
+        r.update(user, message);
     }
 }

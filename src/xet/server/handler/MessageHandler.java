@@ -36,6 +36,24 @@ public class MessageHandler implements HttpHandler {
         OutputStream os = t.getResponseBody();
         os.write(response);
         os.close();
+
+
+        String[] parts = query.split("&");
+
+        String username = parts[0];
+        String[] user = username.split("=");
+
+        String room = parts[1];
+        String[] r = room.split("=");
+
+        String message = parts[2];
+        String[] msg = message.split("=");
+
+        System.out.println("username: " + user[1]);
+        System.out.println("room: " + r[1]);
+        System.out.println("message: " + msg[1]);
+
+        server.updateRooms(user[1], r[1], msg[1]);
     }
 }
 
