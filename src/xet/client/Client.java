@@ -4,9 +4,13 @@ import xet.server.Server;
 import javax.net.ssl.SSLSocketFactory;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,6 +18,7 @@ import java.util.logging.Logger;
 
 public class Client extends JFrame {
     private static final String serverAddress = "http://localhost:8000";
+    public static volatile boolean running = true;
 
     private HttpURLConnection con;
     private String username;
@@ -32,7 +37,6 @@ public class Client extends JFrame {
 
     private SSLSocketFactory sslSocketFactory;
     private Socket socket;
-    //private PrintWriter out;
 
     public Client(String username) {
         this.username = username;
@@ -54,6 +58,7 @@ public class Client extends JFrame {
         userPanel.setPreferredSize(new Dimension(550, 200));
         userPanel.setBackground(Color.darkGray);
 
+        readPanel.setLayout(new BoxLayout(readPanel, BoxLayout.LINE_AXIS));
         readPanel.setPreferredSize(new Dimension(550,400));
 
         writeArea.setPreferredSize(new Dimension(400, 200));
@@ -76,6 +81,33 @@ public class Client extends JFrame {
         messageArea.setBackground(Color.white);
         messageArea.setLineWrap(true);
         this.add(contentPanel);
+
+        send.addActionListener(actionEvent -> {
+            String message = writeArea.getText();
+            if(message == null || message.isEmpty())
+                return;
+
+            writeArea.selectAll();
+            writeArea.replaceSelection("");
+
+            String urlParameters = "username=" + username + "&room=" + room + "&message="+message;
+            byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+
+            try {
+                makeHttpRequest(getUrl(Server.URL_MESSAGE), postData);
+                String content = readServerAnswer();
+                System.out.println(content);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        });
+
+        this.addWindowListener(new WindowAdapter(){
+            public void windowClosing(WindowEvent e){
+                running = false;
+        }});
+
     }
 
     public static String getUrl( String url) {
@@ -99,7 +131,7 @@ public class Client extends JFrame {
         wr.close();
     }
 
-    private boolean makeConnectionToServer() {
+    private ArrayList<String> makeConnectionToServer() {
 
         String urlParameters = "username="+username;
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
@@ -121,16 +153,17 @@ public class Client extends JFrame {
                 }
                 in.close();
 
-            parseConnectionMessage(content.toString());
+
+
+            return parseConnectionMessage(content.toString());
 
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
-        return true;
     }
 
-    private void parseConnectionMessage(String s) {
+    private ArrayList<String> parseConnectionMessage(String s) {
         String[] parts = s.split(";");
 
         String port = parts[0];
@@ -139,6 +172,11 @@ public class Client extends JFrame {
 
         String rooms = parts[1];
         System.out.println("ROOMS: " + rooms);
+
+        rooms.toString().replace("[", "");
+        rooms.toString().replace("]", "");
+
+        return new ArrayList<String>(Arrays.asList(rooms.split(",")));
     }
 
     public static void main(String[] args) {
@@ -152,38 +190,23 @@ public class Client extends JFrame {
 
         try {
             //make request and read response
-            if(!client.makeConnectionToServer()) {
+            ArrayList<String> response = client.makeConnectionToServer();
+            if(response == null) {
                 System.out.print("Error to connect to server!!!");
                 return;
             }
 
-            System.out.println("pim!!!");
 
             //todo choose room - verify if choosen room is available
-            client.chooseRoom(scanner);
+            client.chooseRoom(scanner, response);
 
             //make ssl connection
             client.makeSSLconection();
 
+            //update messages from room
             client.startUpdateThread();
 
-            while(true) {
-                System.out.print("xet> ");
-                String message = scanner.nextLine();
-                if(message.equals("exit")){
-                    break;
-                }
-
-                String urlParameters = "username=" + client.username + "&room=" + client.room + "&message="+message;
-                byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-
-                //necessary - make new http request
-                client.makeHttpRequest(getUrl(Server.URL_MESSAGE), postData);
-
-                String content = client.readServerAnswer();
-                System.out.println(content);
-            }
-            scanner.close();
+            while(running);
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -210,16 +233,15 @@ public class Client extends JFrame {
         this.updateThread = new Thread() {
             public void run() {
                 while(true) {
-                    PrintWriter out = null;
-                    try {
-                        out = new PrintWriter(socket.getOutputStream(), true);
 
-                   BufferedReader bufferedReader = new BufferedReader(
-                                         new InputStreamReader(socket.getInputStream()));
+                    try {
+                        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+
+                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                         String line;
+
                         while((line = bufferedReader.readLine()) != null){
-                            System.out.println(line);
-                            out.println("RECEBEU!!!" + line);
+                            messageArea.append(line + "\n");
                         }
 
                 } catch (IOException e) {
@@ -254,7 +276,7 @@ public class Client extends JFrame {
 
 
     //todo verify if input is valid!!!!
-    private boolean chooseRoom(Scanner scanner) throws IOException {
+    private boolean chooseRoom(Scanner scanner, ArrayList<String> rooms) throws IOException {
 
         System.out.print("Choose room: ");
         this.room = scanner.nextLine();
