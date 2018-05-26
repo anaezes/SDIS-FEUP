@@ -28,7 +28,22 @@ public class RoomHandler implements HttpHandler {
         while ((b = br.read()) != -1) {
             buf.append((char) b);
         }
-        System.out.println(query);
+
+        String[] parts = query.split("&");
+
+        String username = parts[0];
+        String[] user = username.split("=");
+
+        String room = parts[1];
+        String[] r = room.split("=");
+
+        System.out.println("username: " + user[1]);
+        System.out.println("room: " + r[1]);
+
+        new Thread(() -> {
+            server.makeSSLConnection(user[1], r[1]);
+        }).start();
+
         byte [] response = "Room choosen! ".getBytes();
         t.sendResponseHeaders(200, response.length);
         OutputStream os = t.getResponseBody();

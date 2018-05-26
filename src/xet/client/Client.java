@@ -1,27 +1,23 @@
 package xet.client;
 import xet.server.Server;
 
+import javax.net.ssl.SSLSocketFactory;
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
+import java.io.*;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Random;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class Client extends JFrame {
     private static final String serverAddress = "http://localhost:8000";
 
     private HttpURLConnection con;
-    private int idClient;
     private String username;
+    private int port;
     private String room;
     private Thread updateThread;
 
@@ -34,10 +30,16 @@ public class Client extends JFrame {
     private final JPanel userPanel = new JPanel();
     private final JPanel readPanel = new JPanel();
 
+    private SSLSocketFactory sslSocketFactory;
+    private Socket socket;
+    //private PrintWriter out;
+
     public Client(String username) {
-        Random ran = new Random();
-        this.idClient = ran.nextInt();
         this.username = username;
+
+        System.setProperty("javax.net.ssl.trustStoreType", "JKS");
+        System.setProperty("javax.net.ssl.trustStore", System.getProperty("user.dir") + File.separator + "keyStore" + File.separator + "truststore");
+        System.setProperty("javax.net.ssl.trustStorePassword","123456");
 
         initGUI();
     }
@@ -99,7 +101,7 @@ public class Client extends JFrame {
 
     private boolean makeConnectionToServer() {
 
-        String urlParameters = "id=" + idClient + "&xet.username="+username;
+        String urlParameters = "username="+username;
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
 
@@ -119,13 +121,24 @@ public class Client extends JFrame {
                 }
                 in.close();
 
-            System.out.println(content.toString());
+            parseConnectionMessage(content.toString());
 
         } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
         return true;
+    }
+
+    private void parseConnectionMessage(String s) {
+        String[] parts = s.split(";");
+
+        String port = parts[0];
+        System.out.println("PORT: "  + port);
+        this.port = Integer.parseInt(port);
+
+        String rooms = parts[1];
+        System.out.println("ROOMS: " + rooms);
     }
 
     public static void main(String[] args) {
@@ -144,10 +157,17 @@ public class Client extends JFrame {
                 return;
             }
 
-            //todo choose room
+            System.out.println("pim!!!");
+
+            //todo choose room - verify if choosen room is available
             client.chooseRoom(scanner);
 
+            //make ssl connection
+            client.makeSSLconection();
+
             client.startUpdateThread();
+
+            System.out.println("pam!!!");
 
             while(true) {
                 System.out.print("xet> ");
@@ -155,8 +175,9 @@ public class Client extends JFrame {
                 if(message.equals("exit")){
                     break;
                 }
+                System.out.println("pum!!!");
 
-                String urlParameters = "id=" + client.idClient + "&xet.message="+message;
+                String urlParameters = "username=" + client.username + "&xet.message="+message;
                 byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
                 //necessary - make new http request
@@ -164,6 +185,8 @@ public class Client extends JFrame {
 
                 String content = client.readServerAnswer();
                 System.out.println(content);
+                System.out.println("pam!!!");
+
             }
             scanner.close();
 
@@ -174,6 +197,17 @@ public class Client extends JFrame {
         }
 
         System.exit(0);
+    }
+
+    private void makeSSLconection() {
+
+        try {
+            sslSocketFactory = (SSLSocketFactory)SSLSocketFactory.getDefault();
+            socket = sslSocketFactory.createSocket("localhost", port);
+        } catch (IOException ex) {
+            Logger.getLogger(Client.class.getName())
+                    .log(Level.SEVERE, null, ex);
+        }
     }
 
     private void startUpdateThread() {
@@ -249,12 +283,13 @@ public class Client extends JFrame {
     }
 
 
+    //todo verify if input is valid!!!!
     private boolean chooseRoom(Scanner scanner) throws IOException {
 
         System.out.print("Choose room: ");
         this.room = scanner.nextLine();
 
-        String urlParameters = "id=" + idClient + "&xet.room="+room;
+        String urlParameters = "username=" + username + "&room="+room;
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
         try {

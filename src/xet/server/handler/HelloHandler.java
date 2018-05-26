@@ -29,10 +29,8 @@ public class HelloHandler implements HttpHandler {
         while ((b = br.read()) != -1) {
             buf.append((char) b);
         }
-        System.out.println(query);
 
-        //Room generalRoom = new Room("general");
-        byte [] response = ("Available rooms > " + server.getAvailableRooms().toString()).getBytes();
+        byte [] response = (server.getPort()+";" + server.getAvailableRooms().toString()).getBytes();
 
         t.sendResponseHeaders(200, response.length);
         OutputStream os = t.getResponseBody();
