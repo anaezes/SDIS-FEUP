@@ -4,6 +4,7 @@ import xet.server.Server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import xet.server.UsersManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -42,6 +43,7 @@ public class MessageHandler implements HttpHandler {
 
         String username = parts[0];
         String[] user = username.split("=");
+        String displayName = UsersManager.Get().getUserName(user[1]);
 
         String room = parts[1];
         String[] r = room.split("=");
@@ -49,11 +51,11 @@ public class MessageHandler implements HttpHandler {
         String message = parts[2];
         String[] msg = message.split("=");
 
-        System.out.println("username: " + user[1]);
+        System.out.println("username: " + displayName);
         System.out.println("room: " + r[1]);
         System.out.println("message: " + msg[1]);
 
-        server.updateRooms(user[1], r[1], msg[1]);
+        server.updateRooms(displayName, r[1], msg[1]);
     }
 }
 

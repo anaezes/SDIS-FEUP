@@ -98,7 +98,7 @@ public class Google {
         @Override
         public void handle(HttpExchange t) throws IOException {
             Map<String, String> params = Utils.queryToMap(t.getRequestURI().getQuery());
-            //performCodeExchange(params.get("code"));
+            //performCodeExchange(params.Get("code"));
 
             String response = "You can close your browser and return to the app\n" + codeVerifier + "\n\n";
             for (int i = 0; i < params.size(); i++) {

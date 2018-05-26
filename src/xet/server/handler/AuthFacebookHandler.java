@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpHandler;
 import xet.providers.Facebook;
 import xet.server.Server;
 import xet.server.User;
+import xet.server.UsersManager;
 import xet.utils.Utils;
 
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class AuthFacebookHandler implements HttpHandler {
         if (accessToken != "") {
             User user = Facebook.GetUserInfo(accessToken, identifier);
             if (user != null && user.getId().length() > 0){
-                // TODO Save user info to server
+                UsersManager.Get().addUser(user);
                 response = "Welcome " + user.getName() + "!\nYou can close your browser and return to the application";
             }
             else response = "Error getting user info, please try again later";

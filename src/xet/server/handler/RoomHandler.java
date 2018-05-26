@@ -3,6 +3,7 @@ import xet.server.Server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import xet.server.UsersManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -37,7 +38,7 @@ public class RoomHandler implements HttpHandler {
         String room = parts[1];
         String[] r = room.split("=");
 
-        System.out.println("username: " + user[1]);
+        System.out.println("username: " + UsersManager.Get().getUserName(user[1]));
         System.out.println("room: " + r[1]);
 
         new Thread(() -> {
