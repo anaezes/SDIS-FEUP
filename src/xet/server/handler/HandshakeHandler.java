@@ -28,7 +28,7 @@ public class HandshakeHandler implements HttpHandler {
             buf.append((char) b);
         }*/
 
-        byte [] response = (server.getSocketPort()+";" + RoomsManager.Get().getAvailableRooms().toString()).getBytes();
+        byte [] response = (server.getSocketPort()+";" + RoomsManager.Get().getPublicRooms().toString()).getBytes();
 
         t.sendResponseHeaders(200, response.length);
         OutputStream os = t.getResponseBody();

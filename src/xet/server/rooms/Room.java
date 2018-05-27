@@ -13,6 +13,9 @@ public class Room {
 
     private String name;
     private String invitationCode;
+    private String OwnerId;
+    private boolean isPrivate = false;
+
     private final HashMap<String, Socket> socketsClients = new HashMap<>();
 
     public Room(String name) {
@@ -20,8 +23,23 @@ public class Room {
         generateNewInvitationCode();
     }
 
+    public Room(String name, String ownerId, boolean isPrivate) {
+        this.name = name;
+        this.OwnerId = ownerId;
+        this.isPrivate = isPrivate;
+        generateNewInvitationCode();
+    }
+
     public String getName() {
         return name;
+    }
+
+    public String getOwnerId() {
+        return OwnerId;
+    }
+
+    public boolean isPrivate() {
+        return isPrivate;
     }
 
     public void addClientToRoom(String identifier, Socket serverSocket) {

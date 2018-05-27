@@ -95,7 +95,6 @@ public class Server {
     }
 
     public static String BuildUrl(String url) {
-        System.out.println(url);
         return Server.SERVER_URL + url;
     }
 

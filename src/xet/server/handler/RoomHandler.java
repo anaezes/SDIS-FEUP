@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import xet.server.Server;
 import xet.server.rooms.RoomsManager;
+import xet.server.users.UsersManager;
 import xet.utils.Utils;
 
 import java.io.IOException;
@@ -24,18 +25,46 @@ public class RoomHandler implements HttpHandler {
         Map<String, String> params = Utils.requestBodyToMap(t.getRequestBody());
         String id = params.get("identification");
         String room = params.get("room");
+        String operation = params.get("op");
+        String providerId = UsersManager.Get().getUser(id).getProviderId();
+        String response = "";
 
         //create new room if don't exist
-        // TODO change to different param
-        if(!RoomsManager.Get().getAvailableRooms().contains(room)) {
-            RoomsManager.Get().addRoom(room);
+        switch (operation) {
+            case "join": {
+                if(!RoomsManager.Get().getAllRooms().contains(room)) {
+                    response = "rejected - Room does not exist!";
+                } else {
+                    response = "accepted - Joined!";
+                    new Thread(() -> {
+                        server.makeSSLConnection(id, room);
+                    }).start();
+                }
+                break;
+            }
+            case "create": {
+                if (providerId == "guest") {
+                    response = "rejected - You don't have permissions to create rooms!";
+                } else if(RoomsManager.Get().getAvailableRooms(id).contains(room)) {
+                    response = "rejected - Room already exists!";
+                } else {
+                    String type = params.get("type");
+                    if (type == null) {
+                        response = "rejected - Room type not found!";
+                    }
+                    else if (type.equals("public")) {
+                        RoomsManager.Get().addPublicRoom(room, providerId);
+                        response = "accepted - Created public room!";
+                    } else if (type.equals("private")) {
+                        RoomsManager.Get().addPrivateRoom(room, providerId);
+                        response = "accepted - Created private room!";
+                    } else {
+                        response = "rejected - Unrecognized room type " + type;
+                    }
+                }
+            }
         }
 
-        new Thread(() -> {
-            server.makeSSLConnection(id, room);
-        }).start();
-
-        String response = "Room chosen!";
         t.sendResponseHeaders(200, response.length());
         OutputStream os = t.getResponseBody();
         os.write(response.getBytes());

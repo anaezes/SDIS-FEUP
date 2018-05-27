@@ -1,5 +1,7 @@
 package xet.server.rooms;
 
+import xet.server.users.UsersManager;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,14 +22,38 @@ public class RoomsManager {
         return rooms.get(name);
     }
 
-    public ArrayList<String> getAvailableRooms() {
-        ArrayList<String> availableRooms = new ArrayList<>();
+    public ArrayList<String> getAvailableRooms(String userId) {
+        ArrayList<String> rooms = new ArrayList<>();
 
-        for(Map.Entry<String, Room> room : rooms.entrySet()) {
-            availableRooms.add(room.getKey());
+        for(Map.Entry<String, Room> room : this.rooms.entrySet()) {
+            String providerId = UsersManager.Get().getUser(userId).getProviderId();
+            if (!room.getValue().isPrivate())
+                rooms.add(room.getKey());
+            else if (room.getValue().getOwnerId().equals(providerId))
+                rooms.add(room.getKey());
+        }
+        return rooms;
+    }
+
+    public ArrayList<String> getPublicRooms() {
+        ArrayList<String> rooms = new ArrayList<>();
+
+        for(Map.Entry<String, Room> room : this.rooms.entrySet()) {
+            if (!room.getValue().isPrivate())
+                rooms.add(room.getKey());
         }
 
-        return availableRooms;
+        return rooms;
+    }
+
+    public ArrayList<String> getAllRooms() {
+        ArrayList<String> rooms = new ArrayList<>();
+
+        for(Map.Entry<String, Room> room : this.rooms.entrySet()) {
+            rooms.add(room.getKey());
+        }
+
+        return rooms;
     }
 
     // Returns the room that the client with given identifier is
@@ -57,7 +83,11 @@ public class RoomsManager {
         r.update(userId, message);
     }
 
-    public void addRoom(String s) {
-        rooms.put(s, new Room(s));
+    public void addPublicRoom(String s, String ownerId) {
+        rooms.put(s, new Room(s, ownerId, false));
+    }
+
+    public void addPrivateRoom(String s, String ownerId) {
+        rooms.put(s, new Room(s, ownerId, true));
     }
 }

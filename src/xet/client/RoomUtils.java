@@ -18,6 +18,8 @@ public class RoomUtils {
 
     public void chooseRoom(ArrayList<String> rooms) throws IOException {
         if (rooms == null) rooms = this.rooms;
+        else this.rooms = rooms;
+
         JComboBox<String> roomsList = new JComboBox(rooms.toArray());
 
         String[] options = {"Join Room", "Create Room", "Invite Code", "Cancel"};
@@ -44,8 +46,55 @@ public class RoomUtils {
 
 
     private void createRoom() throws IOException {
-        String room = JOptionPane.showInputDialog(null, "Name of room:",
-                "Create Room", JOptionPane.QUESTION_MESSAGE);
+        String title = "Create Room";
+        String[] options = {"Public Room", "Private Room", "Cancel"};
+
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Enter a name for the room: "));
+        JTextField textField = new JTextField(16);
+        panel.add(textField);
+
+        int selection = JOptionPane.showOptionDialog(null, panel, title,
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
+                options[0]);
+
+        String type = "";
+        switch (selection) {
+            case 0: // Public Room
+                type = "public";
+                break;
+            case 1: // Private Room
+                type = "private";
+                break;
+            default: // Cancel
+                chooseRoom(null);
+                return;
+        }
+
+        String room = textField.getText();
+        if (room.length() == 0) {
+            JOptionPane.showMessageDialog(null, "The name cannot be empty",
+                    "Error Creating Room", JOptionPane.ERROR_MESSAGE);
+            createRoom();
+            return;
+        }
+
+        String urlParameters = "identification=" + client.getIdentification() +
+                "&room=" + room +
+                "&type=" + type +
+                "&op=create";
+        byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+
+        client.sendHttpRequest(Server.BuildUrl(Server.URL_ROOM), postData);
+        String content = client.readServerAnswer();
+
+        if (content.contains("rejected")) {
+            String motive = content.substring(content.indexOf("rejected - ") + "rejected - ".length());
+            JOptionPane.showMessageDialog(null, motive, "Error Creating Room", JOptionPane.ERROR_MESSAGE);
+            createRoom();
+            return;
+        }
+
         joinRoom(room);
     }
 
@@ -54,11 +103,19 @@ public class RoomUtils {
         client.setRoom(room);
         System.out.println(room);
 
-        String urlParameters = "identification=" + client.getIdentification() + "&room=" + room;
+        String urlParameters = "identification=" + client.getIdentification() +
+                "&room=" + room +
+                "&op=join";
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
         client.sendHttpRequest(Server.BuildUrl(Server.URL_ROOM), postData);
         String content = client.readServerAnswer();
+
+        if (content.contains("rejected")) {
+            String motive = content.substring(content.indexOf("rejected - ") + "rejected - ".length());
+            JOptionPane.showMessageDialog(null, motive, "Error Joining Room", JOptionPane.ERROR_MESSAGE);
+            chooseRoom(null);
+        }
         System.out.println(content);
     }
 
