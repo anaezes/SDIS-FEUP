@@ -70,7 +70,7 @@ public class Client extends JFrame {
         isRoomOwner = roomOwner;
     }
 
-    public String readServerAnswer() throws IOException {
+    public String readServerAnswer() {
 
         StringBuilder content;
 
@@ -84,7 +84,12 @@ public class Client extends JFrame {
                 content.append(line);
                 content.append(System.lineSeparator());
             }
-            in.close();
+        } catch (IOException e) {
+            if (room != null)
+                JOptionPane.showMessageDialog(null, "Connection to this room was lost. Maybe the room was deleted!",
+                        "Connection Lost", JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
+            return "";
         }
 
         return content.toString();

@@ -22,6 +22,7 @@ public class RoomUtils {
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
         client.sendHttpRequest(Server.BuildUrl(Server.URL_ROOM), postData);
         String content = client.readServerAnswer();
+        content = content.trim();
 
         String[] options = content.split(";");
         return options;
@@ -53,6 +54,8 @@ public class RoomUtils {
                 joinByInvitation();
                 break;
             case "Cancel":
+                System.exit(0);
+            default:
                 System.exit(0);
         }
     }
