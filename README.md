@@ -44,3 +44,6 @@ Password: SDISfeup123
 Email: 	sdis_msianee_d@tfbnw.net
 Password: SDISfeup123
 
+## Notas
+Visto não termos conseguido exportar o repositório git para svn de forma a preservar os commits,
+foi adicionado na secção de documentos do redmine um ficheiro txt com todos os log's do projeto.
