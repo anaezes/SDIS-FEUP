@@ -37,7 +37,6 @@ public class Server {
     private HttpServer server;
 
     private final HashMap<String, Room> rooms = new HashMap<>();
-    //private final HashMap<String, ServerSocket> socketsClients = new HashMap<>();
 
     private SSLServerSocketFactory sslServerSocketFactory;
     //private ServerSocket sslServerSocket;
@@ -60,7 +59,6 @@ public class Server {
         server.createContext(URL_HANDSHAKE, new HandshakeHandler(this));
         server.createContext(URL_ROOM, new RoomHandler(this));
         server.createContext(URL_MESSAGE, new MessageHandler(this));
-        //server.createContext(URL_UPDATE, new UpdateHandler(this));
         server.createContext(URL_ROOM_INVITATION, new RoomInvitationHandler(this));
         server.createContext(URL_AUTH_FACEBOOK, new AuthFacebookHandler(this));
         server.createContext(URL_AUTH_GUEST, new AuthGuestHandler(this));
@@ -134,9 +132,7 @@ public class Server {
     }
 
     public void updateRooms(String user, String room, String message) {
-        System.out.println("Update Rooms");
         Room r = rooms.get(room);
-        System.out.println("pum");
         r.update(user, message);
     }
 

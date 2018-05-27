@@ -25,37 +25,19 @@ public class Room {
     }
 
     public void addClientToRoom(String identifier, Socket serverSocket) {
-
         socketsClients.put(identifier, serverSocket);
     }
 
-    public ArrayList<String> getClientsOfRoom(){
-        ArrayList<String> clients = new ArrayList<>();
-
-        for(Map.Entry<String, Socket> room : socketsClients.entrySet()) {
-            clients.add(room.getKey());
-        }
-
-        return clients;
-    }
-
     public void update(String user, String message) {
-
-        //TODO remove prints?
-        System.out.println("update!!!!!");
-
         for(Map.Entry<String, Socket> room : socketsClients.entrySet()) {
 
             Socket socket = room.getValue();
             try {
                 PrintWriter in = new PrintWriter(socket.getOutputStream(), true);
                 in.println(user + "> " + message);
-                System.out.println("pim!!!!!");
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
     }
 
