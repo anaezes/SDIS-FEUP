@@ -1,5 +1,7 @@
 package xet.room;
 
+import xet.utils.Utils;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -10,19 +12,21 @@ import java.util.Map;
 public class Room {
 
     private String name;
+    private String invitationCode;
     private final HashMap<String, Socket> socketsClients = new HashMap<>();
 
     public Room(String name) {
         this.name = name;
+        generateNewInvitationCode();
     }
 
     public String getName() {
         return name;
     }
 
-    public void addClientToRoom(String username, Socket serverSocket) {
+    public void addClientToRoom(String identifier, Socket serverSocket) {
 
-        socketsClients.put(username, serverSocket);
+        socketsClients.put(identifier, serverSocket);
     }
 
     public ArrayList<String> getClientsOfRoom(){
@@ -37,6 +41,7 @@ public class Room {
 
     public void update(String user, String message) {
 
+        //TODO remove prints?
         System.out.println("update!!!!!");
 
         for(Map.Entry<String, Socket> room : socketsClients.entrySet()) {
@@ -52,5 +57,18 @@ public class Room {
             }
 
         }
+    }
+
+    public boolean clientIsInRoom(String identifier) {
+        return socketsClients.get(identifier) != null;
+    }
+
+    public String getInvitationCode() {
+        return invitationCode;
+    }
+
+    public String generateNewInvitationCode() {
+        this.invitationCode = Utils.RandomDataBase64url(16);
+        return getInvitationCode();
     }
 }

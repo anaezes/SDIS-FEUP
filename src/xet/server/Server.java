@@ -29,6 +29,7 @@ public class Server {
     public final static String URL_ROOM = "/room";
     public final static String URL_MESSAGE = "/message";
     public final static String URL_UPDATE = "/update";
+    public final static String URL_ROOM_INVITATION = "/room/invitation";
     public final static String URL_AUTH_FACEBOOK = "/auth/fb";
     public final static String URL_AUTH_GUEST = "/auth/guest";
 
@@ -60,6 +61,7 @@ public class Server {
         server.createContext(URL_ROOM, new RoomHandler(this));
         server.createContext(URL_MESSAGE, new MessageHandler(this));
         //server.createContext(URL_UPDATE, new UpdateHandler(this));
+        server.createContext(URL_ROOM_INVITATION, new RoomInvitationHandler(this));
         server.createContext(URL_AUTH_FACEBOOK, new AuthFacebookHandler(this));
         server.createContext(URL_AUTH_GUEST, new AuthGuestHandler(this));
         server.setExecutor(null); // creates a default executor
@@ -76,6 +78,28 @@ public class Server {
         return availableRooms;
     }
 
+    // Returns the room that the client with given identifier is
+    public Room getRoomFromClientIdentifier(String identifier) {
+        for(Map.Entry<String, Room> roomKV : rooms.entrySet()) {
+            Room room = roomKV.getValue();
+            if (room.clientIsInRoom(identifier)) {
+                return room;
+            }
+        }
+        return null;
+    }
+
+    // Returns the room that has the invitation code
+    public Room getRoomFromInvitationCode(String code) {
+        for(Map.Entry<String, Room> roomKV : rooms.entrySet()) {
+            Room room = roomKV.getValue();
+            if (room.getInvitationCode().equals(code)) {
+                return room;
+            }
+        }
+        return null;
+    }
+
     public int getSocketPort() {
         return socketPort;
     }
@@ -84,7 +108,7 @@ public class Server {
         this.socketPort += 1;
     }
 
-    public void makeSSLConnection(String username, String room) {
+    public void makeSSLConnection(String identifier, String room) {
 
         try {
             ServerSocket sslServerSocket = sslServerSocketFactory.createServerSocket(socketPort);
@@ -95,7 +119,7 @@ public class Server {
             System.out.println("ServerSocket accepted");
 
             Room r = rooms.get(room);
-            r.addClientToRoom(username, socket);
+            r.addClientToRoom(identifier, socket);
 
         } catch (IOException ex) {
             Logger.getLogger(Server.class.getName())

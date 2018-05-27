@@ -2,6 +2,7 @@ package xet.client;
 import xet.providers.Facebook;
 import xet.providers.Guest;
 import xet.server.Server;
+import xet.utils.Utils;
 
 import javax.net.ssl.SSLSocketFactory;
 import javax.swing.*;
@@ -122,8 +123,36 @@ public class Client extends JFrame {
             }});
 
         inviteFriends.addActionListener(actionEvent -> {
-            //todo invite friends
+            showInviteFriendsDialog();
         });
+    }
+
+    private void showInviteFriendsDialog() {
+        // Gets invitation code
+        String invitationCode = Utils.SendGet(Server.SERVER_URL + Server.URL_ROOM_INVITATION + "?" +
+                "state=" + this.username +
+                "&op=getCode"
+        );
+
+        String[] options = { "Generate new code", "Ok"};
+        JTextField textField = new JTextField(16);
+        textField.setText(invitationCode);
+        int selection = JOptionPane.showOptionDialog(null, textField, "Invitation Code",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
+                options[0]);
+
+        switch (selection) {
+            case 0: // Generate new code
+                Utils.SendGet(Server.SERVER_URL + Server.URL_ROOM_INVITATION + "?" +
+                        "state=" + this.username +
+                        "&op=newCode"
+                );
+                showInviteFriendsDialog();
+                return;
+            case 1: // Ok
+                break;
+
+        }
     }
 
     public static String getUrl( String url) {
@@ -131,8 +160,8 @@ public class Client extends JFrame {
     }
 
     private void makeHttpRequest(String url, byte[] params) throws IOException {
-        URL myurl = new URL(url);
-        con = (HttpURLConnection) myurl.openConnection();
+        URL myUrl = new URL(url);
+        con = (HttpURLConnection) myUrl.openConnection();
 
         con.setDoOutput(true);
         con.setDoInput(true);
@@ -193,27 +222,7 @@ public class Client extends JFrame {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        String id = "";
-
-        System.out.println("Select login method: ");
-        System.out.println("1 - Guest Login");
-        System.out.println("2 - Facebook Login");
-        String option = scanner.nextLine();
-        System.out.println(option);
-
-        if (option.contains("1")) {
-            System.out.println("Guest Login");
-            System.out.println("Enter desired username:");
-            String username = scanner.nextLine();
-            id = Guest.doLogin(username);
-        } else if (option.contains("2")) {
-            System.out.println("Facebook Login");
-            id = Facebook.doLogin(Server.SERVER_URL);
-        } else {
-            System.err.println("Option not recognized");
-            System.exit(1);
-        }
-
+        String id = doLogin();
         Client client = new Client(id);
 
         try {
@@ -245,7 +254,25 @@ public class Client extends JFrame {
         System.exit(0);
     }
 
-
+    private static String doLogin() {
+        String[] options = { "Guest", "Facebook", "Quit"};
+        int selection = JOptionPane.showOptionDialog(null, "Select a login method", "Server Xet - Login",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
+                options[0]);
+        switch (selection)  {
+            case 0: // Guest
+                String username;
+                do {
+                    username = JOptionPane.showInputDialog("Enter username");
+                } while (username.length() == 0);
+                return Guest.doLogin(username);
+            case 1: // Facebook
+                return Facebook.doLogin(Server.SERVER_URL);
+            default:
+                System.exit(0);
+        }
+        return "";
+    }
 
     private void makeSSLconection() {
 
@@ -306,25 +333,41 @@ public class Client extends JFrame {
 
         roomsList = new JComboBox(rooms.toArray());
 
-        String[] options = { "OK", "Cancel", "Create Room"};
+        String[] options = {"Join Room", "Create Room", "Invite Code", "Cancel"};
 
         String title = "Choose a room";
         int selection = JOptionPane.showOptionDialog(null, roomsList, title,
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
                 options[0]);
 
-        if (selection == 1)
+        if (selection == 3) // Cancel
             System.exit(0);
 
         String room = "";
-        if (selection == 2)
+        if (selection == 1) // Create Room
             room = JOptionPane.showInputDialog("Name of room:");
-        else if(selection == 0)
+        else if (selection == 0) // Join Room
             room = (String) roomsList.getSelectedItem();
+        else if (selection == 2) { // Invite Code
+            String code = JOptionPane.showInputDialog("Enter invitation code");
+            String response = Utils.SendGet(Server.SERVER_URL + Server.URL_ROOM_INVITATION + "?" +
+                "state=" + this.username +
+                "&op=" + "join" +
+                "&code=" + code);
+            if (response.contains("reject")) {
+                JOptionPane.showMessageDialog(null,
+                        "The invitation code entered isn't valid or has expired",
+                        "Invalid invitation code",
+                        JOptionPane.ERROR_MESSAGE);
+                return chooseRoom(scanner, rooms);
+            } else {
+                room = response;
+            }
+        }
 
-        this.room = room.replace(" ", "");;
+        this.room = room.replace(" ", "");
 
-        String urlParameters = "username=" + username + "&room="+this.room;
+        String urlParameters = "username=" + username + "&room=" + this.room;
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
         try {
