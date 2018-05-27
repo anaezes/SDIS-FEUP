@@ -97,7 +97,7 @@ public class Google {
     class AuthorizationHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
-            Map<String, String> params = Utils.queryToMap(t.getRequestURI().getQuery());
+            Map<String, String> params = Utils.QueryToMap(t.getRequestURI().getQuery());
             //performCodeExchange(params.Get("code"));
 
             String response = "You can close your browser and return to the app\n" + codeVerifier + "\n\n";
@@ -114,7 +114,7 @@ public class Google {
     class TokenHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
-            Map<String, String> params = Utils.queryToMap(t.getRequestURI().getQuery());
+            Map<String, String> params = Utils.QueryToMap(t.getRequestURI().getQuery());
             performCodeExchange(params.get("code"));
 
             String response = "";

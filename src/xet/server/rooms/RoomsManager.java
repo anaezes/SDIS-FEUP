@@ -85,9 +85,11 @@ public class RoomsManager {
 
     public void addPublicRoom(String s, String ownerId) {
         rooms.put(s, new Room(s, ownerId, false));
+        System.out.println("public:" + rooms.get(s).getOwnerId());
     }
 
     public void addPrivateRoom(String s, String ownerId) {
         rooms.put(s, new Room(s, ownerId, true));
+        System.out.println( "private:" + rooms.get(s).getOwnerId());
     }
 }

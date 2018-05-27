@@ -11,7 +11,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -192,8 +191,7 @@ public class Client extends JFrame {
     }
 
     private ArrayList<String> makeConnectionToServer() {
-
-        String urlParameters = "username="+ identification;
+        String urlParameters = "identification="+ identification;
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
         try {
@@ -211,8 +209,11 @@ public class Client extends JFrame {
                 content.append(System.lineSeparator());
             }
             in.close();
-            return parseConnectionMessage(content.toString());
-
+            if (content.toString().contains("rejected")) {
+                return null;
+            } else {
+                return parseConnectionMessage(content.toString());
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -275,8 +276,38 @@ public class Client extends JFrame {
         Client client = new Client(id);
 
         try {
-            //make request and read response
-            ArrayList<String> response = client.makeConnectionToServer();
+            //Waits for the server to register the user (providers take longer than guests)
+            ArrayList<String> response;
+            /*Thread t = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    String[] options = {"Abort"};
+
+                    JOptionPane.showOptionDialog(null, "Connecting to server",
+                            "Logging In", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
+                            options[0]);
+                    System.exit(0);
+                }
+            });
+            t.run();*/
+            JFrame frame = new JFrame();
+            SwingUtilities.invokeAndWait(() -> {
+                String[] options = {};
+                frame.setContentPane(new JOptionPane("Logging in", JOptionPane.INFORMATION_MESSAGE ,
+                        JOptionPane.DEFAULT_OPTION ,null , options));
+                frame.pack();
+                frame.setLocationRelativeTo(null);
+                frame.setVisible(true);
+                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+            });
+            do {
+                response = client.makeConnectionToServer();
+                Thread.sleep(1000);
+            } while (response == null);
+            frame.setVisible(false);
+
+
             if(response == null) {
                 System.err.println("Error to connect to server!");
                 return;
@@ -294,9 +325,7 @@ public class Client extends JFrame {
 
             while(running);
 
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

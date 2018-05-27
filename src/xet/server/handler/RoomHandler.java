@@ -22,7 +22,7 @@ public class RoomHandler implements HttpHandler {
     }
 
     public void handle(HttpExchange t) throws IOException {
-        Map<String, String> params = Utils.requestBodyToMap(t.getRequestBody());
+        Map<String, String> params = Utils.RequestBodyToMap(t.getRequestBody());
         String id = params.get("identification");
         String room = params.get("room");
         String operation = params.get("op");

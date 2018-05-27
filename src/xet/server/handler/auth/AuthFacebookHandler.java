@@ -21,7 +21,7 @@ public class AuthFacebookHandler implements HttpHandler {
     }
 
     public void handle(HttpExchange t) throws IOException {
-        Map<String, String> params = Utils.queryToMap(t.getRequestURI().getQuery());
+        Map<String, String> params = Utils.QueryToMap(t.getRequestURI().getQuery());
         String accessToken = Facebook.GetAccessToken(CLIENT_SECRET, params.get("code"));
         String identifier = params.get("state");
 

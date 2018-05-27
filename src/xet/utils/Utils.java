@@ -1,5 +1,7 @@
 package xet.utils;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.ServerSocket;
@@ -25,7 +27,7 @@ public class Utils {
         return 0;
     }
 
-    public static Map<String, String> requestBodyToMap(InputStream requestBody) {
+    public static Map<String, String> RequestBodyToMap(InputStream requestBody) {
         String query = "";
         try {
             InputStreamReader isr =  new InputStreamReader(requestBody,StandardCharsets.UTF_8.name());
@@ -39,10 +41,10 @@ public class Utils {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return queryToMap(query);
+        return QueryToMap(query);
     }
 
-    public static Map<String, String> queryToMap(String query){
+    public static Map<String, String> QueryToMap(String query){
         Map<String, String> result = new HashMap<String, String>();
         for (String param : query.split("&")) {
             String pair[] = param.split("=");
@@ -176,5 +178,18 @@ public class Utils {
 
     public static String SimpleJsonParser(String JSON, String key) {
         return SimpleJsonParser(JSON, key, true);
+    }
+
+    public static void CloseJOptionPane() {
+        Window[] windows = Window.getWindows();
+        for (Window window : windows) {
+            if (window instanceof JDialog) {
+                JDialog dialog = (JDialog) window;
+                if (dialog.getContentPane().getComponentCount() == 1
+                        && dialog.getContentPane().getComponent(0) instanceof JOptionPane){
+                    dialog.dispose();
+                }
+            }
+        }
     }
 }

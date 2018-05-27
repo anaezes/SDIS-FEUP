@@ -36,6 +36,10 @@ public class UsersManager {
         return "anonymous";
     }
 
+    public boolean exists(String id) {
+        return getUser(id) != null;
+    }
+
     public int getGuests() {
         return guests;
     }
