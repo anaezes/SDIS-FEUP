@@ -22,6 +22,14 @@ public class RoomsManager {
         return rooms.get(name);
     }
 
+    public boolean remove(String name) {
+        if (rooms.containsKey(name)) {
+            rooms.remove(name);
+            return true;
+        }
+        return false;
+    }
+
     public ArrayList<String> getAvailableRooms(String userId) {
         ArrayList<String> rooms = new ArrayList<>();
 
@@ -29,7 +37,8 @@ public class RoomsManager {
             String providerId = UsersManager.Get().getUser(userId).getProviderId();
             if (!room.getValue().isPrivate() ||                         // If room is public
                     room.getValue().getOwnerId().equals(providerId) ||  // If user is owner
-                    room.getValue().isUserInvited(providerId))          // If user is invited
+                    room.getValue().isUserInvited(providerId) ||        // If user is invited
+                    room.getValue().isGuestInvited(userId))             // If guest is invited
                 rooms.add(room.getKey());
         }
         return rooms;

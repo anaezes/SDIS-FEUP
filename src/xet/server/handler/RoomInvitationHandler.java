@@ -38,16 +38,13 @@ public class RoomInvitationHandler implements HttpHandler {
                 String code = params.get("code");
                 room = RoomsManager.Get().getRoomFromInvitationCode(code);
                 if (room != null) {
-                    System.out.println(1);
                     response = room.getName();
-                    System.out.println(2);
                     User user = UsersManager.Get().getUser(userId);
-                    System.out.println(3);
                     System.out.println(user.getProviderId());
-                    if (user != null && !user.getProviderId().equals("guest")) {
-                        room.addInvitedUser(user.getProviderId());
+                    if (user != null) {
+                        if (!user.getProviderId().equals("guest")) room.addInvitedUser(user.getProviderId());
+                        else room.addInvitedGuest(user.getId());
                     }
-                    System.out.println(4);
 
                 } else {
                     response = "rejected";

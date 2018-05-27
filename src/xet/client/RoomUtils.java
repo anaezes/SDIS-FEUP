@@ -16,30 +16,43 @@ public class RoomUtils {
         this.client = client;
     }
 
+    private String[] getOptions() throws IOException {
+        String urlParameters = "identification=" + client.getIdentification() +
+                "&op=options";
+        byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+        client.sendHttpRequest(Server.BuildUrl(Server.URL_ROOM), postData);
+        String content = client.readServerAnswer();
+
+        String[] options = content.split(";");
+        return options;
+    }
+
     public void chooseRoom(ArrayList<String> rooms) throws IOException {
         if (rooms == null) rooms = this.rooms;
         else this.rooms = rooms;
 
         JComboBox<String> roomsList = new JComboBox(rooms.toArray());
 
-        String[] options = {"Join Room", "Create Room", "Invite Code", "Cancel"};
+        getOptions();
+        //String[] options = {"Join Room", "Create Room", "Invite Code", "Cancel"};
+        String[] options = getOptions();
 
         String title = "Choose a room";
         int selection = JOptionPane.showOptionDialog(null, roomsList, title,
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
                 options[0]);
 
-        switch (selection) {
-            case 0: // Join Room
+        switch (options[selection]) {
+            case "Join Room":
                 joinRoom((String) roomsList.getSelectedItem());
                 break;
-            case 1: // Create Room
+            case "Create Room":
                 createRoom();
                 break;
-            case 2: // Invite Code
+            case "Invite Code":
                 joinByInvitation();
                 break;
-            case 3: // Cancel
+            case "Cancel":
                 System.exit(0);
         }
     }
@@ -101,7 +114,6 @@ public class RoomUtils {
     private void joinRoom(String room) throws IOException {
         room = room.trim();
         client.setRoom(room);
-        System.out.println(room);
 
         String urlParameters = "identification=" + client.getIdentification() +
                 "&room=" + room +
@@ -116,7 +128,7 @@ public class RoomUtils {
             JOptionPane.showMessageDialog(null, motive, "Error Joining Room", JOptionPane.ERROR_MESSAGE);
             chooseRoom(null);
         }
-        System.out.println(content);
+        client.setRoomOwner(content.contains("owner"));
     }
 
     private void joinByInvitation() throws IOException {
@@ -135,6 +147,22 @@ public class RoomUtils {
             String room = response;
             System.out.println("Room name:" + room + "-");
             joinRoom(room);
+        }
+    }
+
+    public void removeRoom() throws IOException {
+        int option = JOptionPane.showConfirmDialog(null, "Do you wish to remove this room?",
+                "Remove Room " + client.getRoom(), JOptionPane.YES_NO_OPTION);
+        if (option == JOptionPane.YES_OPTION) {
+            String urlParameters = "identification=" + client.getIdentification() +
+                    "&room=" + client.getRoom() +
+                    "&op=delete";
+
+            byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+
+            client.sendHttpRequest(Server.BuildUrl(Server.URL_ROOM), postData);
+            String content = client.readServerAnswer();
+            System.out.println(content);
         }
     }
 }

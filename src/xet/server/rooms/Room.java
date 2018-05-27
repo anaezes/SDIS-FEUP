@@ -14,20 +14,22 @@ public class Room {
 
     private String name;
     private String invitationCode;
-    private String OwnerId;
+    private String ownerId;
     private boolean isPrivate = false;
     private ArrayList<String> invitedUsers = new ArrayList<>();
+    private ArrayList<String> invitedGuests = new ArrayList<>();
 
     private final HashMap<String, Socket> socketsClients = new HashMap<>();
 
     public Room(String name) {
         this.name = name;
+        this.ownerId = "server";
         generateNewInvitationCode();
     }
 
     public Room(String name, String ownerId, boolean isPrivate) {
         this.name = name;
-        this.OwnerId = ownerId;
+        this.ownerId = ownerId;
         this.isPrivate = isPrivate;
         generateNewInvitationCode();
     }
@@ -37,7 +39,7 @@ public class Room {
     }
 
     public String getOwnerId() {
-        return OwnerId;
+        return ownerId;
     }
 
     public boolean isPrivate() {
@@ -85,5 +87,17 @@ public class Room {
 
     public void kickInvitedUser(String userId) {
         invitedUsers.remove(userId);
+    }
+
+    public void addInvitedGuest(String userId) {
+        if (!invitedGuests.contains(userId)) invitedUsers.add(userId);
+    }
+
+    public boolean isGuestInvited(String userId) {
+        return invitedGuests.contains(userId);
+    }
+
+    public void kickGuestUser(String userId) {
+        invitedGuests.remove(userId);
     }
 }

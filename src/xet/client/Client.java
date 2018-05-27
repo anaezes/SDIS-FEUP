@@ -28,6 +28,7 @@ public class Client extends JFrame {
     private int socketPort;
     private String room;
     private Thread updateThread;
+    private boolean isRoomOwner = false;
 
     private final JPanel contentPanel = new JPanel();
     private final JTextPane writeArea = new JTextPane();
@@ -36,6 +37,7 @@ public class Client extends JFrame {
     private final JScrollPane jScrollPane2 = new JScrollPane(messageArea);
     private final JButton send = new JButton("SEND");
     private final JButton inviteFriends = new JButton("Invite Friends");
+    private final JButton deleteRoom = new JButton("Delete Room");
     private final JPanel userPanel = new JPanel();
     private final JPanel readPanel = new JPanel();
 
@@ -62,6 +64,10 @@ public class Client extends JFrame {
 
     public void setRoom(String room) {
         this.room = room;
+    }
+
+    public void setRoomOwner(boolean roomOwner) {
+        isRoomOwner = roomOwner;
     }
 
     public String readServerAnswer() throws IOException {
@@ -94,6 +100,7 @@ public class Client extends JFrame {
         this.setVisible(true);
         this.setSize(new Dimension(750,700));
         this.setTitle("XET - Best chat in the World [" + this.room + "]");
+        this.setLocationRelativeTo(null);
         contentPanel.setSize(new Dimension(800,600));
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
         contentPanel.setBackground(Color.darkGray);
@@ -108,16 +115,19 @@ public class Client extends JFrame {
         writeArea.setEditable(true);
         jScrollPane1.setPreferredSize(new Dimension(400, 200));
 
-        messageArea.setSize(new Dimension(550, 400));
+        messageArea.setSize(new Dimension(500, 400));
         messageArea.setEditable(false);
-        jScrollPane2.setSize(new Dimension(550, 400));
+        jScrollPane2.setSize(new Dimension(500, 400));
 
-        send.setPreferredSize(new Dimension(100,50));
-        inviteFriends.setPreferredSize(new Dimension(150,50));
+        send.setPreferredSize(new Dimension(70,50));
+        inviteFriends.setPreferredSize(new Dimension(120,50));
+        deleteRoom.setPreferredSize(new Dimension(120,50));
 
         userPanel.add(jScrollPane1);
         userPanel.add(send);
         userPanel.add(inviteFriends);
+        if (isRoomOwner) userPanel.add(deleteRoom);
+
         readPanel.add(jScrollPane2);
 
         contentPanel.add(readPanel);
@@ -160,6 +170,14 @@ public class Client extends JFrame {
         inviteFriends.addActionListener(actionEvent -> {
             showInviteFriendsDialog();
         });
+
+        deleteRoom.addActionListener(ActionEvent -> {
+            try {
+                roomUtils.removeRoom();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void showInviteFriendsDialog() {
@@ -179,7 +197,7 @@ public class Client extends JFrame {
         switch (selection) {
             case 0: // Generate new code
                 Utils.SendGet(Server.SERVER_URL + Server.URL_ROOM_INVITATION + "?" +
-                        "state=" + this.identification +
+                        "identification=" + this.identification +
                         "&op=newCode"
                 );
                 showInviteFriendsDialog();

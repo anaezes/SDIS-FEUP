@@ -3,7 +3,9 @@ package xet.server.handler;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import xet.server.Server;
+import xet.server.rooms.Room;
 import xet.server.rooms.RoomsManager;
+import xet.server.users.User;
 import xet.server.users.UsersManager;
 import xet.utils.Utils;
 
@@ -32,10 +34,14 @@ public class RoomHandler implements HttpHandler {
         //create new room if don't exist
         switch (operation) {
             case "join": {
-                if(!RoomsManager.Get().getAllRooms().contains(room)) {
+                if(!RoomsManager.Get().getAvailableRooms(id).contains(room)) {
                     response = "rejected - Room does not exist!";
                 } else {
                     response = "accepted - Joined!";
+                    User user = UsersManager.Get().getUser(id);
+                    if (user != null && RoomsManager.Get().get(room).getOwnerId().equals(user.getProviderId())) {
+                        response += "owner;" + response;
+                    }
                     new Thread(() -> {
                         server.makeSSLConnection(id, room);
                     }).start();
@@ -62,6 +68,31 @@ public class RoomHandler implements HttpHandler {
                         response = "rejected - Unrecognized room type " + type;
                     }
                 }
+                break;
+            }
+            case "delete": {
+                Room r = RoomsManager.Get().get(room);
+                User user = UsersManager.Get().getUser(id);
+                if (r == null || user == null) {
+                    response = "rejected - Action couldn't be completed!";
+                    break;
+                }
+
+                if (r.getOwnerId().equals(user.getProviderId())) {
+                    RoomsManager.Get().remove(room);
+                } else {
+                    response = "rejected - Only the owner can delete the room";
+                }
+                break;
+            }
+            case "options": {
+                String options = "Join Room;Create Room;Invite Code;Cancel";
+                User user = UsersManager.Get().getUser(id);
+                if (user == null || user.getProviderId().equals("guest"))
+                    options = options.replace("Create Room;", "");
+
+                response = options;
+                break;
             }
         }
 
