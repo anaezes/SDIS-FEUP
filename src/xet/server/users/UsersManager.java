@@ -1,13 +1,11 @@
-package xet.server;
+package xet.server.users;
 
 import java.util.ArrayList;
 
 public class UsersManager {
-    private static UsersManager instance;
+    private static final UsersManager instance = new UsersManager();
     private static int guests = 0;
-
     public static UsersManager Get() {
-        if (instance == null) instance = new UsersManager();
         return instance;
     }
 

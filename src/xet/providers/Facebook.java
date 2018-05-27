@@ -1,7 +1,7 @@
 package xet.providers;
 
 import xet.server.Server;
-import xet.server.User;
+import xet.server.users.User;
 import xet.utils.Utils;
 
 import java.awt.*;

@@ -1,11 +1,10 @@
-package xet.room;
+package xet.server.rooms;
 
 import xet.utils.Utils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 

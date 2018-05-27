@@ -1,14 +1,16 @@
 package xet.server.handler;
-import xet.server.Server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import xet.server.UsersManager;
+import xet.server.Server;
+import xet.server.rooms.RoomsManager;
+import xet.utils.Utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * Created by ana on 5/24/18.
@@ -21,6 +23,7 @@ public class RoomHandler implements HttpHandler {
     }
 
     public void handle(HttpExchange t) throws IOException {
+        System.out.println(t.getRequestURI());
         InputStreamReader isr =  new InputStreamReader(t.getRequestBody(),"utf-8");
         BufferedReader br = new BufferedReader(isr);
         String query = br.readLine();
@@ -30,30 +33,24 @@ public class RoomHandler implements HttpHandler {
             buf.append((char) b);
         }
 
-        String[] parts = query.split("&");
-
-        String username = parts[0];
-        String[] user = username.split("=");
-
-        String room = parts[1];
-        String[] r = room.split("=");
-
-        System.out.println("username: " + UsersManager.Get().getUserName(user[1]));
-        System.out.println("room: " + r[1]);
+        Map<String, String> params = Utils.queryToMap(query);
+        String id = params.get("identification");
+        String room = params.get("room");
 
         //create new room if don't exist
-        if(!server.getAvailableRooms().contains(r[1])) {
-            server.addRoom(r[1]);
+        // TODO change to different param
+        if(!RoomsManager.Get().getAvailableRooms().contains(room)) {
+            RoomsManager.Get().addRoom(room);
         }
 
         new Thread(() -> {
-            server.makeSSLConnection(user[1], r[1]);
+            server.makeSSLConnection(id, room);
         }).start();
 
-        byte [] response = "Room choosen! ".getBytes();
-        t.sendResponseHeaders(200, response.length);
+        String response = "Room chosen!";
+        t.sendResponseHeaders(200, response.length());
         OutputStream os = t.getResponseBody();
-        os.write(response);
+        os.write(response.getBytes());
         os.close();
     }
 }

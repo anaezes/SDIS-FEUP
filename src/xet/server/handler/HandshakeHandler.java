@@ -1,13 +1,11 @@
 package xet.server.handler;
 
-import xet.server.Server;
-
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import xet.server.Server;
+import xet.server.rooms.RoomsManager;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 
 /**
@@ -21,16 +19,16 @@ public class HandshakeHandler implements HttpHandler {
     }
 
     public void handle(HttpExchange t) throws IOException {
-        InputStreamReader isr =  new InputStreamReader(t.getRequestBody(),"utf-8");
+       /* InputStreamReader isr =  new InputStreamReader(t.getRequestBody(),"utf-8");
         BufferedReader br = new BufferedReader(isr);
         String query = br.readLine();
         int b;
         StringBuilder buf = new StringBuilder(512);
         while ((b = br.read()) != -1) {
             buf.append((char) b);
-        }
+        }*/
 
-        byte [] response = (server.getSocketPort()+";" + server.getAvailableRooms().toString()).getBytes();
+        byte [] response = (server.getSocketPort()+";" + RoomsManager.Get().getAvailableRooms().toString()).getBytes();
 
         t.sendResponseHeaders(200, response.length);
         OutputStream os = t.getResponseBody();

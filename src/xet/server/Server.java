@@ -1,9 +1,13 @@
 package xet.server;
 import com.sun.net.httpserver.HttpServer;
-import xet.room.Room;
-import xet.server.handler.*;
+import xet.server.handler.HandshakeHandler;
+import xet.server.handler.MessageHandler;
+import xet.server.handler.RoomHandler;
+import xet.server.handler.RoomInvitationHandler;
 import xet.server.handler.auth.AuthFacebookHandler;
 import xet.server.handler.auth.AuthGuestHandler;
+import xet.server.rooms.Room;
+import xet.server.rooms.RoomsManager;
 
 import javax.net.ssl.SSLServerSocketFactory;
 import java.io.File;
@@ -11,9 +15,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,15 +37,13 @@ public class Server {
     private int socketPort = 6000;
     private HttpServer server;
 
-    private final HashMap<String, Room> rooms = new HashMap<>();
-
     private SSLServerSocketFactory sslServerSocketFactory;
     //private ServerSocket sslServerSocket;
 
     public Server() throws IOException {
 
-        rooms.put("general", new Room("general"));
-        rooms.put("games", new Room("games"));
+        RoomsManager.Get().add("general", new Room("general"));
+        RoomsManager.Get().add("games", new Room("games"));
 
         server = HttpServer.create(new InetSocketAddress(SERVER_PORT), 0);
 
@@ -66,37 +65,7 @@ public class Server {
         server.start();
     }
 
-    public ArrayList<String> getAvailableRooms() {
-        ArrayList<String> availableRooms = new ArrayList<>();
 
-        for(Map.Entry<String, Room> room : rooms.entrySet()) {
-            availableRooms.add(room.getKey());
-        }
-
-        return availableRooms;
-    }
-
-    // Returns the room that the client with given identifier is
-    public Room getRoomFromClientIdentifier(String identifier) {
-        for(Map.Entry<String, Room> roomKV : rooms.entrySet()) {
-            Room room = roomKV.getValue();
-            if (room.clientIsInRoom(identifier)) {
-                return room;
-            }
-        }
-        return null;
-    }
-
-    // Returns the room that has the invitation code
-    public Room getRoomFromInvitationCode(String code) {
-        for(Map.Entry<String, Room> roomKV : rooms.entrySet()) {
-            Room room = roomKV.getValue();
-            if (room.getInvitationCode().equals(code)) {
-                return room;
-            }
-        }
-        return null;
-    }
 
     public int getSocketPort() {
         return socketPort;
@@ -116,7 +85,7 @@ public class Server {
             Socket socket = sslServerSocket.accept();
             System.out.println("ServerSocket accepted");
 
-            Room r = rooms.get(room);
+            Room r = RoomsManager.Get().get(room);
             r.addClientToRoom(identifier, socket);
 
         } catch (IOException ex) {
@@ -129,14 +98,5 @@ public class Server {
 
     public static void main(String[] args) throws Exception {
         new Server().start();
-    }
-
-    public void updateRooms(String user, String room, String message) {
-        Room r = rooms.get(room);
-        r.update(user, message);
-    }
-
-    public void addRoom(String s) {
-        rooms.put(s, new Room(s));
     }
 }

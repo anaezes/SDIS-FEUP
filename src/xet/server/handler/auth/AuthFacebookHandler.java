@@ -4,8 +4,8 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import xet.providers.Facebook;
 import xet.server.Server;
-import xet.server.User;
-import xet.server.UsersManager;
+import xet.server.users.User;
+import xet.server.users.UsersManager;
 import xet.utils.Utils;
 
 import java.io.IOException;

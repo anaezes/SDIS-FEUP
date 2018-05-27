@@ -4,7 +4,8 @@ import xet.server.Server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import xet.server.UsersManager;
+import xet.server.rooms.RoomsManager;
+import xet.server.users.UsersManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -53,7 +54,7 @@ public class MessageHandler implements HttpHandler {
         System.out.println("room: " + r[1]);
         System.out.println("message: " + msg[1]);
 
-        server.updateRooms(displayName, r[1], msg[1]);
+        RoomsManager.Get().updateRooms(displayName, r[1], msg[1]);
     }
 }
 

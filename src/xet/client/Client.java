@@ -27,7 +27,7 @@ public class Client extends JFrame {
     public static volatile boolean running = true;
 
     private HttpURLConnection con;
-    private String username;
+    private String identification;
     private int socketPort;
     private String room;
     private Thread updateThread;
@@ -47,8 +47,8 @@ public class Client extends JFrame {
     private SSLSocketFactory sslSocketFactory;
     private Socket socket;
 
-    public Client(String username) {
-        this.username = username;
+    public Client(String identification) {
+        this.identification = identification;
 
         System.setProperty("javax.net.ssl.trustStoreType", "JKS");
         System.setProperty("javax.net.ssl.trustStore", System.getProperty("user.dir") + File.separator + "keyStore" + File.separator + "truststore");
@@ -58,7 +58,7 @@ public class Client extends JFrame {
     private void initGUI() {
         this.setVisible(true);
         this.setSize(new Dimension(750,700));
-        this.setTitle("XET - Best chat in the World");
+        this.setTitle("XET - Best chat in the World [" + this.room + "]");
         contentPanel.setSize(new Dimension(800,600));
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
         contentPanel.setBackground(Color.darkGray);
@@ -103,7 +103,7 @@ public class Client extends JFrame {
             writeArea.replaceSelection("");
 
             message = message.replace("\n", " ");
-            String urlParameters = "username=" + username + "&room=" + room + "&message="+message;
+            String urlParameters = "username=" + identification + "&room=" + room + "&message="+message;
 
             byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
@@ -130,7 +130,7 @@ public class Client extends JFrame {
     private void showInviteFriendsDialog() {
         // Gets invitation code
         String invitationCode = Utils.SendGet(Server.SERVER_URL + Server.URL_ROOM_INVITATION + "?" +
-                "state=" + this.username +
+                "state=" + this.identification +
                 "&op=getCode"
         );
 
@@ -144,7 +144,7 @@ public class Client extends JFrame {
         switch (selection) {
             case 0: // Generate new code
                 Utils.SendGet(Server.SERVER_URL + Server.URL_ROOM_INVITATION + "?" +
-                        "state=" + this.username +
+                        "state=" + this.identification +
                         "&op=newCode"
                 );
                 showInviteFriendsDialog();
@@ -178,7 +178,7 @@ public class Client extends JFrame {
 
     private ArrayList<String> makeConnectionToServer() {
 
-        String urlParameters = "username="+username;
+        String urlParameters = "username="+ identification;
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
         try {
@@ -238,7 +238,7 @@ public class Client extends JFrame {
             client.initGUI();
 
             //make ssl connection
-            client.makeSSLconection();
+            client.makeSslConnection();
 
             //update messages from room
             client.startUpdateThread();
@@ -256,7 +256,7 @@ public class Client extends JFrame {
 
     private static String doLogin() {
         String[] options = { "Guest", "Facebook", "Quit"};
-        int selection = JOptionPane.showOptionDialog(null, "Select a login method", "Server Xet - Login",
+        int selection = JOptionPane.showOptionDialog(null, "Select a login method", "Xet - Login",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
                 options[0]);
         switch (selection)  {
@@ -274,7 +274,7 @@ public class Client extends JFrame {
         return "";
     }
 
-    private void makeSSLconection() {
+    private void makeSslConnection() {
 
         try {
             sslSocketFactory = (SSLSocketFactory)SSLSocketFactory.getDefault();
@@ -351,7 +351,7 @@ public class Client extends JFrame {
         else if (selection == 2) { // Invite Code
             String code = JOptionPane.showInputDialog("Enter invitation code");
             String response = Utils.SendGet(Server.SERVER_URL + Server.URL_ROOM_INVITATION + "?" +
-                "state=" + this.username +
+                "state=" + this.identification +
                 "&op=" + "join" +
                 "&code=" + code);
             if (response.contains("reject")) {
@@ -365,9 +365,9 @@ public class Client extends JFrame {
             }
         }
 
-        this.room = room.replace(" ", "");
+        this.room = room.trim();
 
-        String urlParameters = "username=" + username + "&room=" + this.room;
+        String urlParameters = "identification=" + identification + "&room=" + this.room;
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
         try {

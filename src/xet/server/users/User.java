@@ -1,4 +1,4 @@
-package xet.server;
+package xet.server.users;
 
 public class User {
     private String id;
