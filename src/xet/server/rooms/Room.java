@@ -6,6 +6,7 @@ import xet.utils.Utils;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ public class Room {
     private String invitationCode;
     private String OwnerId;
     private boolean isPrivate = false;
+    private ArrayList<String> invitedUsers = new ArrayList<>();
 
     private final HashMap<String, Socket> socketsClients = new HashMap<>();
 
@@ -71,5 +73,17 @@ public class Room {
     public String generateNewInvitationCode() {
         this.invitationCode = Utils.RandomDataBase64url(16);
         return getInvitationCode();
+    }
+
+    public void addInvitedUser(String userId) {
+        if (!invitedUsers.contains(userId)) invitedUsers.add(userId);
+    }
+
+    public boolean isUserInvited(String userId) {
+        return invitedUsers.contains(userId);
+    }
+
+    public void kickInvitedUser(String userId) {
+        invitedUsers.remove(userId);
     }
 }

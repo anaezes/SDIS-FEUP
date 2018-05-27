@@ -165,7 +165,7 @@ public class Client extends JFrame {
     private void showInviteFriendsDialog() {
         // Gets invitation code
         String invitationCode = Utils.SendGet(Server.SERVER_URL + Server.URL_ROOM_INVITATION + "?" +
-                "state=" + this.identification +
+                "identification=" + this.identification +
                 "&op=getCode"
         );
 
@@ -277,19 +277,6 @@ public class Client extends JFrame {
 
         try {
             //Waits for the server to register the user (providers take longer than guests)
-            ArrayList<String> response;
-            /*Thread t = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    String[] options = {"Abort"};
-
-                    JOptionPane.showOptionDialog(null, "Connecting to server",
-                            "Logging In", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
-                            options[0]);
-                    System.exit(0);
-                }
-            });
-            t.run();*/
             JFrame frame = new JFrame();
             SwingUtilities.invokeAndWait(() -> {
                 String[] options = {};
@@ -299,19 +286,14 @@ public class Client extends JFrame {
                 frame.setLocationRelativeTo(null);
                 frame.setVisible(true);
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
             });
+
+            ArrayList<String> response;
             do {
                 response = client.makeConnectionToServer();
                 Thread.sleep(1000);
             } while (response == null);
             frame.setVisible(false);
-
-
-            if(response == null) {
-                System.err.println("Error to connect to server!");
-                return;
-            }
 
             client.roomUtils.chooseRoom(response);
 

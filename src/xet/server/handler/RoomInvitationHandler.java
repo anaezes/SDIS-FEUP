@@ -5,6 +5,8 @@ import com.sun.net.httpserver.HttpHandler;
 import xet.server.rooms.Room;
 import xet.server.Server;
 import xet.server.rooms.RoomsManager;
+import xet.server.users.User;
+import xet.server.users.UsersManager;
 import xet.utils.Utils;
 
 import java.io.IOException;
@@ -22,24 +24,37 @@ public class RoomInvitationHandler implements HttpHandler {
         Map<String, String> params = Utils.QueryToMap(t.getRequestURI().getQuery());
 
         String operation = params.get("op");
-        String identifier = params.get("state");
+        String userId = params.get("identification");
         String response;
         Room room;
 
         switch (operation){
             case "getCode":
-                room = RoomsManager.Get().getRoomFromClientIdentifier(identifier);
+                room = RoomsManager.Get().getRoomFromClientIdentifier(userId);
                 if (room != null) response = room.getInvitationCode();
                 else response = "rejected";
                 break;
             case "join":
                 String code = params.get("code");
                 room = RoomsManager.Get().getRoomFromInvitationCode(code);
-                if (room != null) response = room.getName();
-                else response = "rejected";
+                if (room != null) {
+                    System.out.println(1);
+                    response = room.getName();
+                    System.out.println(2);
+                    User user = UsersManager.Get().getUser(userId);
+                    System.out.println(3);
+                    System.out.println(user.getProviderId());
+                    if (user != null && !user.getProviderId().equals("guest")) {
+                        room.addInvitedUser(user.getProviderId());
+                    }
+                    System.out.println(4);
+
+                } else {
+                    response = "rejected";
+                }
                 break;
             case "newCode":
-                room = RoomsManager.Get().getRoomFromClientIdentifier(identifier);
+                room = RoomsManager.Get().getRoomFromClientIdentifier(userId);
                 if (room != null) response = room.generateNewInvitationCode();
                 else response = "rejected";
                 break;

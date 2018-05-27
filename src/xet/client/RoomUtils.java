@@ -122,7 +122,7 @@ public class RoomUtils {
     private void joinByInvitation() throws IOException {
         String code = JOptionPane.showInputDialog("Enter invitation code");
         String response = Utils.SendGet(Server.SERVER_URL + Server.URL_ROOM_INVITATION + "?" +
-                "state=" + client.getName() +
+                "identification=" + client.getIdentification() +
                 "&op=" + "join" +
                 "&code=" + code);
         if (response.contains("reject")) {
@@ -133,6 +133,7 @@ public class RoomUtils {
             chooseRoom(null);
         } else {
             String room = response;
+            System.out.println("Room name:" + room + "-");
             joinRoom(room);
         }
     }

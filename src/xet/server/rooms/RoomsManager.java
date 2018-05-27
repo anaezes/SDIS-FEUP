@@ -27,9 +27,9 @@ public class RoomsManager {
 
         for(Map.Entry<String, Room> room : this.rooms.entrySet()) {
             String providerId = UsersManager.Get().getUser(userId).getProviderId();
-            if (!room.getValue().isPrivate())
-                rooms.add(room.getKey());
-            else if (room.getValue().getOwnerId().equals(providerId))
+            if (!room.getValue().isPrivate() ||                         // If room is public
+                    room.getValue().getOwnerId().equals(providerId) ||  // If user is owner
+                    room.getValue().isUserInvited(providerId))          // If user is invited
                 rooms.add(room.getKey());
         }
         return rooms;
