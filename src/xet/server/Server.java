@@ -42,8 +42,10 @@ public class Server {
 
     public Server() throws IOException {
 
-        RoomsManager.Get().add("general", new Room("general"));
-        RoomsManager.Get().add("games", new Room("games"));
+        if (!RoomsManager.Get().load()) {
+            RoomsManager.Get().add("general", new Room("general"));
+            RoomsManager.Get().add("games", new Room("games"));
+        }
 
         server = HttpServer.create(new InetSocketAddress(SERVER_PORT), 0);
 

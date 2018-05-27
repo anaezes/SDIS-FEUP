@@ -2,6 +2,7 @@ package xet.server.rooms;
 
 import xet.server.users.UsersManager;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +13,7 @@ public class RoomsManager {
         return instance;
     }
 
-    private final HashMap<String, Room> rooms = new HashMap<>();
+    private HashMap<String, Room> rooms = new HashMap<>();
 
     public void add(String name, Room room) {
         rooms.put(name, room);
@@ -35,6 +36,7 @@ public class RoomsManager {
 
         for(Map.Entry<String, Room> room : this.rooms.entrySet()) {
             String providerId = UsersManager.Get().getUser(userId).getProviderId();
+
             if (!room.getValue().isPrivate() ||                         // If room is public
                     room.getValue().getOwnerId().equals(providerId) ||  // If user is owner
                     room.getValue().isUserInvited(providerId) ||        // If user is invited
@@ -94,11 +96,61 @@ public class RoomsManager {
 
     public void addPublicRoom(String s, String ownerId) {
         rooms.put(s, new Room(s, ownerId, false));
-        System.out.println("public:" + rooms.get(s).getOwnerId());
+        save();
     }
 
     public void addPrivateRoom(String s, String ownerId) {
         rooms.put(s, new Room(s, ownerId, true));
         System.out.println( "private:" + rooms.get(s).getOwnerId());
+        save();
+    }
+
+    public void save() {
+        if (rooms == null || rooms.size() == 0) return;
+
+        ArrayList<RoomSave> roomSaves = new ArrayList<>();
+        for(Map.Entry<String, Room> room : rooms.entrySet()) {
+            Room r = room.getValue();
+            RoomSave rs = new RoomSave();
+            rs.key = room.getKey();
+            rs.name = r.getName();
+            rs.invitationCode = r.getInvitationCode();
+            rs.ownerId = r.getOwnerId();
+            rs.isPrivate = r.isPrivate();
+            rs.invitedUsers = r.getInvitedUsers();
+            roomSaves.add(rs);
+        }
+
+        try {
+            FileOutputStream saveFile = new FileOutputStream("rooms.sav");
+            ObjectOutputStream save = new ObjectOutputStream(saveFile);
+            save.writeObject(roomSaves);
+            save.close();
+            saveFile.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean load() {
+        try {
+            File f = new File("rooms.sav");
+            if (!f.exists()) return false;
+
+            FileInputStream saveFile = new FileInputStream("rooms.sav");
+            ObjectInputStream save = new ObjectInputStream(saveFile);
+            ArrayList<RoomSave> roomSaves = (ArrayList<RoomSave>) save.readObject();
+            save.close();
+            saveFile.close();
+
+            for (int i = 0; i < roomSaves.size(); i++) {
+                RoomSave rs = roomSaves.get(i);
+                rooms.put(rs.key, new Room(rs));
+            }
+            return rooms.size() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

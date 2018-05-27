@@ -34,6 +34,14 @@ public class Room {
         generateNewInvitationCode();
     }
 
+    public Room(RoomSave roomSave) {
+        name = roomSave.name;
+        ownerId = roomSave.ownerId;
+        isPrivate = roomSave.isPrivate;
+        invitationCode = roomSave.invitationCode;
+        invitedUsers = roomSave.invitedUsers;
+    }
+
     public String getName() {
         return name;
     }
@@ -72,6 +80,10 @@ public class Room {
         return invitationCode;
     }
 
+    public ArrayList<String> getInvitedUsers() {
+        return invitedUsers;
+    }
+
     public String generateNewInvitationCode() {
         this.invitationCode = Utils.RandomDataBase64url(16);
         return getInvitationCode();
@@ -90,7 +102,7 @@ public class Room {
     }
 
     public void addInvitedGuest(String userId) {
-        if (!invitedGuests.contains(userId)) invitedUsers.add(userId);
+        if (!invitedGuests.contains(userId)) invitedGuests.add(userId);
     }
 
     public boolean isGuestInvited(String userId) {

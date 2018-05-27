@@ -40,19 +40,25 @@ public class RoomInvitationHandler implements HttpHandler {
                 if (room != null) {
                     response = room.getName();
                     User user = UsersManager.Get().getUser(userId);
-                    System.out.println(user.getProviderId());
                     if (user != null) {
-                        if (!user.getProviderId().equals("guest")) room.addInvitedUser(user.getProviderId());
-                        else room.addInvitedGuest(user.getId());
+                        if (!user.getProviderId().equals("guest")) {
+                            room.addInvitedUser(user.getProviderId());
+                        }
+                        else {
+                            room.addInvitedGuest(user.getId());
+                        }
+                        RoomsManager.Get().save();
                     }
-
                 } else {
                     response = "rejected";
                 }
                 break;
             case "newCode":
                 room = RoomsManager.Get().getRoomFromClientIdentifier(userId);
-                if (room != null) response = room.generateNewInvitationCode();
+                if (room != null) {
+                    response = room.generateNewInvitationCode();
+                    RoomsManager.Get().save();
+                }
                 else response = "rejected";
                 break;
             default:
