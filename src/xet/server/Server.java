@@ -65,8 +65,6 @@ public class Server {
         server.start();
     }
 
-
-
     public int getSocketPort() {
         return socketPort;
     }
@@ -94,6 +92,11 @@ public class Server {
         }
 
         incrementPort();
+    }
+
+    public static String BuildUrl(String url) {
+        System.out.println(url);
+        return Server.SERVER_URL + url;
     }
 
     public static void main(String[] args) throws Exception {

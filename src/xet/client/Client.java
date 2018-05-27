@@ -17,13 +17,11 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
 public class Client extends JFrame {
-    private static final String serverAddress = "http://localhost:8000";
     public static volatile boolean running = true;
 
     private HttpURLConnection con;
@@ -42,17 +40,55 @@ public class Client extends JFrame {
     private final JPanel userPanel = new JPanel();
     private final JPanel readPanel = new JPanel();
 
-    private JComboBox<String> roomsList;
-
     private SSLSocketFactory sslSocketFactory;
     private Socket socket;
+    private RoomUtils roomUtils;
 
     public Client(String identification) {
         this.identification = identification;
+        roomUtils = new RoomUtils(this);
 
         System.setProperty("javax.net.ssl.trustStoreType", "JKS");
         System.setProperty("javax.net.ssl.trustStore", System.getProperty("user.dir") + File.separator + "keyStore" + File.separator + "truststore");
         System.setProperty("javax.net.ssl.trustStorePassword","123456");
+    }
+
+    public String getIdentification() {
+        return identification;
+    }
+
+    public String getRoom() {
+        return room;
+    }
+
+    public void setRoom(String room) {
+        this.room = room;
+    }
+
+    public String readServerAnswer() throws IOException {
+
+        StringBuilder content;
+
+        try (BufferedReader in = new BufferedReader(
+                new InputStreamReader(con.getInputStream()))) {
+
+            String line;
+            content = new StringBuilder();
+
+            while ((line = in.readLine()) != null) {
+                content.append(line);
+                content.append(System.lineSeparator());
+            }
+            in.close();
+        }
+
+        return content.toString();
+    }
+
+    public void sendHttpRequest(String url, byte[] params) throws IOException {
+        URL myUrl = new URL(url);
+        con = (HttpURLConnection) myUrl.openConnection();
+        Utils.SendHttpRequest(con, params);
     }
 
     private void initGUI() {
@@ -95,7 +131,7 @@ public class Client extends JFrame {
         send.addActionListener(actionEvent -> {
             String message = writeArea.getText();
             if(message == null || message.isEmpty()) {
-                System.out.println("PUMMM");
+                System.out.println("PUMMM"); // TODO remove?
                 return;
             }
 
@@ -103,12 +139,12 @@ public class Client extends JFrame {
             writeArea.replaceSelection("");
 
             message = message.replace("\n", " ");
-            String urlParameters = "username=" + identification + "&room=" + room + "&message="+message;
+            String urlParameters = "identification=" + identification + "&room=" + room + "&message="+message;
 
             byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
             try {
-                makeHttpRequest(getUrl(Server.URL_MESSAGE), postData);
+                sendHttpRequest(Server.BuildUrl(Server.URL_MESSAGE), postData);
                 String content = readServerAnswer();
                 System.out.println(content);
             } catch (IOException e) {
@@ -155,34 +191,13 @@ public class Client extends JFrame {
         }
     }
 
-    public static String getUrl( String url) {
-        return serverAddress + url;
-    }
-
-    private void makeHttpRequest(String url, byte[] params) throws IOException {
-        URL myUrl = new URL(url);
-        con = (HttpURLConnection) myUrl.openConnection();
-
-        con.setDoOutput(true);
-        con.setDoInput(true);
-        con.setRequestMethod("POST");
-        con.setRequestProperty("User-Agent", "Java xet.client");
-        con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-
-        DataOutputStream wr;
-        wr = new DataOutputStream(con.getOutputStream()) ;
-        wr.write(params);
-        wr.flush();
-        wr.close();
-    }
-
     private ArrayList<String> makeConnectionToServer() {
 
         String urlParameters = "username="+ identification;
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
         try {
-            makeHttpRequest(getUrl(Server.URL_HANDSHAKE), postData);
+            sendHttpRequest(Server.BuildUrl(Server.URL_HANDSHAKE), postData);
 
             StringBuilder content;
 
@@ -220,8 +235,42 @@ public class Client extends JFrame {
         return new ArrayList<String>(Arrays.asList(rooms.split(",")));
     }
 
+    private void makeSslConnection() {
+
+        try {
+            sslSocketFactory = (SSLSocketFactory)SSLSocketFactory.getDefault();
+            socket = sslSocketFactory.createSocket("localhost", socketPort);
+        } catch (IOException ex) {
+            Logger.getLogger(Client.class.getName())
+                    .log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void startUpdateThread() {
+
+        this.updateThread = new Thread(() -> {
+            while(true) {
+
+                try {
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    String line;
+
+                    while((line = bufferedReader.readLine()) != null){
+                        messageArea.append(line + "\n");
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        updateThread.start();
+    }
+
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
         String id = doLogin();
         Client client = new Client(id);
 
@@ -229,11 +278,11 @@ public class Client extends JFrame {
             //make request and read response
             ArrayList<String> response = client.makeConnectionToServer();
             if(response == null) {
-                System.out.print("Error to connect to server!!!");
+                System.err.println("Error to connect to server!");
                 return;
             }
 
-            client.chooseRoom(scanner, response);
+            client.roomUtils.chooseRoom(response);
 
             client.initGUI();
 
@@ -272,114 +321,5 @@ public class Client extends JFrame {
                 System.exit(0);
         }
         return "";
-    }
-
-    private void makeSslConnection() {
-
-        try {
-            sslSocketFactory = (SSLSocketFactory)SSLSocketFactory.getDefault();
-            socket = sslSocketFactory.createSocket("localhost", socketPort);
-        } catch (IOException ex) {
-            Logger.getLogger(Client.class.getName())
-                    .log(Level.SEVERE, null, ex);
-        }
-    }
-
-    private void startUpdateThread() {
-
-        this.updateThread = new Thread(() -> {
-            while(true) {
-
-                try {
-                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    String line;
-
-                    while((line = bufferedReader.readLine()) != null){
-                        messageArea.append(line + "\n");
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        updateThread.start();
-    }
-
-    private String readServerAnswer() throws IOException {
-
-        StringBuilder content;
-
-        try (BufferedReader in = new BufferedReader(
-                new InputStreamReader(con.getInputStream()))) {
-
-            String line;
-            content = new StringBuilder();
-
-            while ((line = in.readLine()) != null) {
-                content.append(line);
-                content.append(System.lineSeparator());
-            }
-            in.close();
-        }
-
-        return content.toString();
-    }
-
-    private boolean chooseRoom(Scanner scanner, ArrayList<String> rooms) throws IOException {
-
-        roomsList = new JComboBox(rooms.toArray());
-
-        String[] options = {"Join Room", "Create Room", "Invite Code", "Cancel"};
-
-        String title = "Choose a room";
-        int selection = JOptionPane.showOptionDialog(null, roomsList, title,
-                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options,
-                options[0]);
-
-        if (selection == 3) // Cancel
-            System.exit(0);
-
-        String room = "";
-        if (selection == 1) // Create Room
-            room = JOptionPane.showInputDialog("Name of room:");
-        else if (selection == 0) // Join Room
-            room = (String) roomsList.getSelectedItem();
-        else if (selection == 2) { // Invite Code
-            String code = JOptionPane.showInputDialog("Enter invitation code");
-            String response = Utils.SendGet(Server.SERVER_URL + Server.URL_ROOM_INVITATION + "?" +
-                "state=" + this.identification +
-                "&op=" + "join" +
-                "&code=" + code);
-            if (response.contains("reject")) {
-                JOptionPane.showMessageDialog(null,
-                        "The invitation code entered isn't valid or has expired",
-                        "Invalid invitation code",
-                        JOptionPane.ERROR_MESSAGE);
-                return chooseRoom(scanner, rooms);
-            } else {
-                room = response;
-            }
-        }
-
-        this.room = room.trim();
-
-        String urlParameters = "identification=" + identification + "&room=" + this.room;
-        byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-
-        try {
-            makeHttpRequest(getUrl(Server.URL_ROOM), postData);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-
-        String content = readServerAnswer();
-        System.out.println(content);
-
-        return true;
     }
 }

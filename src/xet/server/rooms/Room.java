@@ -1,5 +1,6 @@
 package xet.server.rooms;
 
+import xet.server.users.UsersManager;
 import xet.utils.Utils;
 
 import java.io.IOException;
@@ -27,12 +28,13 @@ public class Room {
         socketsClients.put(identifier, serverSocket);
     }
 
-    public void update(String user, String message) {
+    public void update(String userId, String message) {
         for(Map.Entry<String, Socket> room : socketsClients.entrySet()) {
 
             Socket socket = room.getValue();
             try {
                 PrintWriter in = new PrintWriter(socket.getOutputStream(), true);
+                String user = UsersManager.Get().getUserName(userId);
                 in.println(user + "> " + message);
             } catch (IOException e) {
                 e.printStackTrace();

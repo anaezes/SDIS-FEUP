@@ -1,16 +1,14 @@
 package xet.server.handler;
 
-import xet.server.Server;
-
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import xet.server.Server;
 import xet.server.rooms.RoomsManager;
-import xet.server.users.UsersManager;
+import xet.utils.Utils;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * Created by ana on 5/24/18.
@@ -24,37 +22,18 @@ public class MessageHandler implements HttpHandler {
     }
 
     public void handle(HttpExchange t) throws IOException {
-        InputStreamReader isr =  new InputStreamReader(t.getRequestBody(),"utf-8");
-        BufferedReader br = new BufferedReader(isr);
-        String query = br.readLine();
-        int b;
-        StringBuilder buf = new StringBuilder(512);
-        while ((b = br.read()) != -1) {
-            buf.append((char) b);
-        }
+        Map<String, String> params = Utils.requestBodyToMap(t.getRequestBody());
+        String id = params.get("identification");
+        String room = params.get("room");
+        String message = params.get("message");
+
+        RoomsManager.Get().updateRooms(id, room, message);
+
         byte [] response = "Got your message".getBytes();
         t.sendResponseHeaders(200, response.length);
         OutputStream os = t.getResponseBody();
         os.write(response);
         os.close();
-
-        String[] parts = query.split("&");
-
-        String username = parts[0];
-        String[] user = username.split("=");
-        String displayName = UsersManager.Get().getUserName(user[1]);
-
-        String room = parts[1];
-        String[] r = room.split("=");
-
-        String message = parts[2];
-        String[] msg = message.split("=");
-
-        System.out.println("username: " + displayName);
-        System.out.println("room: " + r[1]);
-        System.out.println("message: " + msg[1]);
-
-        RoomsManager.Get().updateRooms(displayName, r[1], msg[1]);
     }
 }
 

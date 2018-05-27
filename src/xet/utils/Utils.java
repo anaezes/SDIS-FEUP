@@ -1,9 +1,6 @@
 package xet.utils;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.ServerSocket;
 import java.net.URL;
@@ -26,6 +23,23 @@ public class Utils {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    public static Map<String, String> requestBodyToMap(InputStream requestBody) {
+        String query = "";
+        try {
+            InputStreamReader isr =  new InputStreamReader(requestBody,StandardCharsets.UTF_8.name());
+            BufferedReader br = new BufferedReader(isr);
+            query = br.readLine();
+            int b;
+            StringBuilder buf = new StringBuilder(512);
+            while ((b = br.read()) != -1) {
+                buf.append((char) b);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return queryToMap(query);
     }
 
     public static Map<String, String> queryToMap(String query){
@@ -128,6 +142,20 @@ public class Utils {
             System.err.println(e);
         }
         return "";
+    }
+
+    public static void SendHttpRequest(HttpURLConnection con, byte[] params) throws IOException {
+        con.setDoOutput(true);
+        con.setDoInput(true);
+        con.setRequestMethod("POST");
+        con.setRequestProperty("User-Agent", "Java xet.client");
+        con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+        DataOutputStream wr;
+        wr = new DataOutputStream(con.getOutputStream()) ;
+        wr.write(params);
+        wr.flush();
+        wr.close();
     }
 
     public static String SimpleJsonParser(String JSON, String key, boolean withQuotes) {

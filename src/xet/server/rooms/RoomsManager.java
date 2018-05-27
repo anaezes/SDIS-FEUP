@@ -52,9 +52,9 @@ public class RoomsManager {
         return null;
     }
 
-    public void updateRooms(String user, String room, String message) {
+    public void updateRooms(String userId, String room, String message) {
         Room r = rooms.get(room);
-        r.update(user, message);
+        r.update(userId, message);
     }
 
     public void addRoom(String s) {
