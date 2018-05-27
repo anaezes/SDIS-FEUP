@@ -24,6 +24,23 @@ ou
 
 ```java -Duser.dir=$(pwd) -cp build xet.client.Client ```
 
+## Credenciais
 
+Credenciais de utilizadores para teste
 
+### SDIS Test User A
+Email: sdis_kiqyuiv_a@tfbnw.net
+Password: SDISfeup123
+
+### SDIS Test User B
+Email: sdis_nncqyfv_b@tfbnw.net
+Password: SDISfeup123
+
+### SDIS Test User C
+Email: sdis_ngtdohj_c@tfbnw.net
+Password: SDISfeup123
+
+### SDIS Test User D
+Email: 	sdis_msianee_d@tfbnw.net
+Password: SDISfeup123
 
