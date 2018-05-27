@@ -98,7 +98,7 @@ public class Client extends JFrame {
 
     private void initGUI() {
         this.setVisible(true);
-        this.setSize(new Dimension(750,700));
+        this.setSize(new Dimension(850,700));
         this.setTitle("XET - Best chat in the World [" + this.room + "]");
         this.setLocationRelativeTo(null);
         contentPanel.setSize(new Dimension(800,600));
@@ -119,9 +119,9 @@ public class Client extends JFrame {
         messageArea.setEditable(false);
         jScrollPane2.setSize(new Dimension(500, 400));
 
-        send.setPreferredSize(new Dimension(70,50));
-        inviteFriends.setPreferredSize(new Dimension(120,50));
-        deleteRoom.setPreferredSize(new Dimension(120,50));
+        send.setPreferredSize(new Dimension(100,50));
+        inviteFriends.setPreferredSize(new Dimension(150,50));
+        deleteRoom.setPreferredSize(new Dimension(150,50));
 
         userPanel.add(jScrollPane1);
         userPanel.add(send);
