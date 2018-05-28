@@ -146,7 +146,6 @@ public class Client extends JFrame {
         send.addActionListener(actionEvent -> {
             String message = writeArea.getText();
             if(message == null || message.isEmpty()) {
-                System.out.println("PUMMM"); // TODO remove?
                 return;
             }
 
@@ -248,11 +247,9 @@ public class Client extends JFrame {
         String[] parts = s.split(";");
 
         String port = parts[0];
-        System.out.println("PORT: "  + port);
         this.socketPort = Integer.parseInt(port);
 
         String rooms = parts[1];
-        System.out.println("ROOMS: " + rooms);
 
         rooms = rooms.toString().replace("[", "");
         rooms = rooms.toString().replace("]", "");
@@ -264,8 +261,6 @@ public class Client extends JFrame {
 
         try {
             sslSocketFactory = (SSLSocketFactory)SSLSocketFactory.getDefault();
-            System.out.println("SERVER URL: " + Server.SERVER_BASE_URL);
-            InetAddress addr = InetAddress.getByName(Server.SERVER_BASE_URL);
             socket = sslSocketFactory.createSocket(Server.SERVER_BASE_URL, socketPort);
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName())

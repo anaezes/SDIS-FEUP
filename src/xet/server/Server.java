@@ -20,14 +20,13 @@ import java.util.logging.Logger;
  * a simple static http xet.server
  */
 public class Server {
-    public static String SERVER_BASE_URL = "192.168.1.10";
+    public static String SERVER_BASE_URL = "localhost";
     public static int SERVER_PORT = 8000;
     public static String SERVER_URL = "http://" + SERVER_BASE_URL + ":" + SERVER_PORT;
 
     public final static String URL_HANDSHAKE = "/handshake";
     public final static String URL_ROOM = "/room";
     public final static String URL_MESSAGE = "/message";
-    public final static String URL_UPDATE = "/update";
     public final static String URL_ROOM_INVITATION = "/room/invitation";
     public final static String URL_AUTH_FACEBOOK = "/auth/fb";
     public final static String URL_AUTH_GUEST = "/auth/guest";
@@ -36,7 +35,6 @@ public class Server {
     private HttpServer server;
 
     private SSLServerSocketFactory sslServerSocketFactory;
-    //private ServerSocket sslServerSocket;
 
     public Server() throws IOException {
 
@@ -76,8 +74,6 @@ public class Server {
     public void makeSSLConnection(String identifier, String room) {
 
         try {
-            //InetAddress addr = InetAddress.getByName(SERVER_BASE_URL);
-            //ServerSocket sslServerSocket = sslServerSocketFactory.createServerSocket(socketPort, 1234, addr);
             ServerSocket sslServerSocket = sslServerSocketFactory.createServerSocket(socketPort);
             System.out.println("SSL ServerSocket started");
             System.out.println(sslServerSocket.toString());
