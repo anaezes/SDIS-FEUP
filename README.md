@@ -18,11 +18,11 @@ Alternativamente pode ser usado o eclipse para abrir e compilar deste modo:
 
 ### Servidor
 
-```java -Duser.dir=$(pwd) -cp build xet.server.Server ```
+```java -Duser.dir=$(pwd) -cp build xet.server.Server <IP_SERVER>```
 
 ou
 
-```java -Duser.dir=$(pwd) -cp build xet.client.Client ```
+```java -Duser.dir=$(pwd) -cp build xet.client.Client <IP_SERVER>```
 
 ## Credenciais
 
