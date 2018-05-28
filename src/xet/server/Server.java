@@ -12,9 +12,7 @@ import xet.server.rooms.RoomsManager;
 import javax.net.ssl.SSLServerSocketFactory;
 import java.io.File;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,9 +20,9 @@ import java.util.logging.Logger;
  * a simple static http xet.server
  */
 public class Server {
-    public final static String SERVER_BASE_URL = "http://localhost";
-    public final static int SERVER_PORT = 8000;
-    public final static String SERVER_URL = SERVER_BASE_URL + ":" + SERVER_PORT;
+    public static String SERVER_BASE_URL = "192.168.1.10";
+    public static int SERVER_PORT = 8000;
+    public static String SERVER_URL = "http://" + SERVER_BASE_URL + ":" + SERVER_PORT;
 
     public final static String URL_HANDSHAKE = "/handshake";
     public final static String URL_ROOM = "/room";
@@ -78,6 +76,8 @@ public class Server {
     public void makeSSLConnection(String identifier, String room) {
 
         try {
+            //InetAddress addr = InetAddress.getByName(SERVER_BASE_URL);
+            //ServerSocket sslServerSocket = sslServerSocketFactory.createServerSocket(socketPort, 1234, addr);
             ServerSocket sslServerSocket = sslServerSocketFactory.createServerSocket(socketPort);
             System.out.println("SSL ServerSocket started");
             System.out.println(sslServerSocket.toString());
@@ -101,6 +101,10 @@ public class Server {
     }
 
     public static void main(String[] args) throws Exception {
+        if (args.length == 1) {
+            SERVER_BASE_URL = args[0];
+            SERVER_URL = "http://" + SERVER_BASE_URL + ":" + SERVER_PORT;
+        }
         new Server().start();
     }
 }

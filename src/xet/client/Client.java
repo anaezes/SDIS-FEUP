@@ -11,6 +11,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -263,7 +264,9 @@ public class Client extends JFrame {
 
         try {
             sslSocketFactory = (SSLSocketFactory)SSLSocketFactory.getDefault();
-            socket = sslSocketFactory.createSocket("localhost", socketPort);
+            System.out.println("SERVER URL: " + Server.SERVER_BASE_URL);
+            InetAddress addr = InetAddress.getByName(Server.SERVER_BASE_URL);
+            socket = sslSocketFactory.createSocket(Server.SERVER_BASE_URL, socketPort);
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName())
                     .log(Level.SEVERE, null, ex);
@@ -295,6 +298,11 @@ public class Client extends JFrame {
     }
 
     public static void main(String[] args) {
+        if (args.length == 1) {
+            Server.SERVER_BASE_URL = args[0];
+            Server.SERVER_URL = "http://" + Server.SERVER_BASE_URL + ":" + Server.SERVER_PORT;
+        }
+
         String id = doLogin();
         Client client = new Client(id);
 
