@@ -1,4 +1,4 @@
-# Serviço distribuído de backups
+# SERVER XET
 
 ## Como compilar
 
